@@ -14,5 +14,13 @@
     "discord.js": "^14.27.0",
     "dotenv": "^17.4.2",
     "googleapis": "^174.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Praful77Jha/discord-sheet-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Praful77Jha/discord-sheet-bot/issues"
+  },
+  "homepage": "https://github.com/Praful77Jha/discord-sheet-bot#readme"
 }
