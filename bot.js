@@ -22,7 +22,6 @@ client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}!`);
 });
 
-// Detect platform & default price from link
 function detectTaskDetails(url, customAmount) {
   let taskType = 'Comment (Twitter/X)';
   let defaultAmount = 0.15;
@@ -78,10 +77,16 @@ client.on('messageCreate', async (message) => {
     const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
     const paymentStatus = 'Not Paid';
 
-    // Set explicitly to 'captain'!A:E
+    // Fetch spreadsheet details to dynamically locate the active sheet tab name
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId: process.env.SPREADSHEET_ID
+    });
+
+    const firstSheetTitle = spreadsheet.data.sheets[0].properties.title;
+
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: "'captain'!A:E",
+      range: `'${firstSheetTitle}'!A:E`,
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [[formattedDate, taskType, amount, paymentStatus, link]]
