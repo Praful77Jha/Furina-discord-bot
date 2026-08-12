@@ -51,37 +51,37 @@ function detectTaskDetails(url, customAmount) {
 }
 
 client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
-
-  // Simple health check command
-  if (message.content === '!ping') {
-    return message.reply('Pong! Bot is working ✅');
-  }
-
-  const prefix = '!log';
-  if (!message.content.startsWith(prefix)) return;
-
-  const args = message.content.slice(prefix.length).trim().split(/ +/);
-
-  if (args.length < 1 || !args[0].startsWith('http')) {
-    return message.reply(
-      '⚠️ **Usage:** `!log <Link>` or `!log <Link> [Amount]`\n**Example:** `!log https://x.com/...`'
-    );
-  }
-
-  const link = args[0];
-  const customAmount = args[1];
-
-  const { taskType, amount } = detectTaskDetails(link, customAmount);
-
-  const today = new Date();
-  const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
-  const paymentStatus = 'Not Paid';
-
   try {
+    if (message.author.bot) return;
+
+    if (message.content === '!ping') {
+      return message.reply('Pong! Bot is working ✅');
+    }
+
+    const prefix = '!log';
+    if (!message.content.startsWith(prefix)) return;
+
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+
+    if (args.length < 1 || !args[0].startsWith('http')) {
+      return message.reply(
+        '⚠️ **Usage:** `!log <Link>` or `!log <Link> [Amount]`\n**Example:** `!log https://x.com/...`'
+      );
+    }
+
+    const link = args[0];
+    const customAmount = args[1];
+
+    const { taskType, amount } = detectTaskDetails(link, customAmount);
+
+    const today = new Date();
+    const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+    const paymentStatus = 'Not Paid';
+
+    // Set explicitly to 'captain'!A:E
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: 'Sheet1!A:E',
+      range: "'captain'!A:E",
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [[formattedDate, taskType, amount, paymentStatus, link]]
@@ -94,8 +94,8 @@ client.on('messageCreate', async (message) => {
       );
     }
   } catch (error) {
-    console.error('Error appending data:', error);
-    message.reply('❌ Failed to append row to Google Sheet. Check console logs.');
+    console.error('Error handling command:', error);
+    message.reply(`❌ **Error:** ${error.message || 'Failed to append row.'}`);
   }
 });
 
