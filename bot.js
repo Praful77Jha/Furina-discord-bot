@@ -22,9 +22,9 @@ client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}!`);
 });
 
-// Helper function to auto-detect platform & default price from link
+// Detect platform & default price from link
 function detectTaskDetails(url, customAmount) {
-  let taskType = 'Comment (Twitter/X)'; // default fallback
+  let taskType = 'Comment (Twitter/X)';
   let defaultAmount = 0.15;
 
   const link = url.toLowerCase();
@@ -43,18 +43,20 @@ function detectTaskDetails(url, customAmount) {
     defaultAmount = 0.15;
   } else if (link.includes('reddit.com')) {
     taskType = 'Comment (Reddit)';
-    defaultAmount = 0.30; // Reddit default rate based on your sheet
+    defaultAmount = 0.30;
   }
 
   const finalAmount = customAmount && !isNaN(customAmount) ? parseFloat(customAmount) : defaultAmount;
   return { taskType, amount: finalAmount };
 }
 
-// Usage syntax:
-// Option 1 (Easiest - Auto Detects everything): !log https://x.com/...
-// Option 2 (Custom Amount):                     !log https://x.com/... 0.20
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
+
+  // Simple health check command
+  if (message.content === '!ping') {
+    return message.reply('Pong! Bot is working ✅');
+  }
 
   const prefix = '!log';
   if (!message.content.startsWith(prefix)) return;
@@ -63,7 +65,7 @@ client.on('messageCreate', async (message) => {
 
   if (args.length < 1 || !args[0].startsWith('http')) {
     return message.reply(
-      '⚠️ **Usage:** `!log <Link>` or `!log <Link> [Amount]`\n**Example:** `!log https://x.com/Not_Menace_09/status/...`'
+      '⚠️ **Usage:** `!log <Link>` or `!log <Link> [Amount]`\n**Example:** `!log https://x.com/...`'
     );
   }
 
@@ -72,7 +74,6 @@ client.on('messageCreate', async (message) => {
 
   const { taskType, amount } = detectTaskDetails(link, customAmount);
 
-  // M/D/YYYY format matching your sheet exactly
   const today = new Date();
   const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
   const paymentStatus = 'Not Paid';
@@ -80,7 +81,7 @@ client.on('messageCreate', async (message) => {
   try {
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: 'Sheet1!A:E', // Make sure your tab name matches ('Sheet1' or whatever your tab is named)
+      range: 'Sheet1!A:E',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [[formattedDate, taskType, amount, paymentStatus, link]]
