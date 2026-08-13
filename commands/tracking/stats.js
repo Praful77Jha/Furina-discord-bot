@@ -1,33 +1,65 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sheets, getSheetTitle } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle } = require('../../utils/googleSheets');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
-    .setDescription('View sheet overview and total balance'),
+    .setDescription('View sheet overview and metrics')
+    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
+      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' })),
 
   async execute(interaction) {
     await interaction.deferReply();
-    const sheetTitle = await getSheetTitle();
+    const sheetKey = interaction.options.getString('sheet');
+    const config = SHEET_CONFIGS[sheetKey];
+    if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
+
+    const sheetTitle = await getSheetTitle(config.spreadsheetId);
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.SPREADSHEET_ID,
-      range: `'${sheetTitle}'!A2:E`
+      spreadsheetId: config.spreadsheetId,
+      range: `'${sheetTitle}'!A${config.startRow}:${config.lastCol}`
     });
 
     const rows = response.data.values || [];
-    let totalAmount = 0, unpaidAmount = 0, paidCount = 0, unpaidCount = 0;
 
-    rows.forEach(row => {
-      const amt = parseFloat(row[2] ? row[2].toString().replace('$', '') : 0) || 0;
-      const status = row[3] ? row[3].trim() : '';
+    if (sheetKey === 'captain') {
+      let totalAmount = 0, unpaidAmount = 0, paidCount = 0, unpaidCount = 0;
 
-      totalAmount += amt;
-      if (status === 'Paid') paidCount++;
-      else if (status === 'Not Paid') { unpaidAmount += amt; unpaidCount++; }
-    });
+      rows.forEach(row => {
+        const amt = parseFloat(row[2] ? row[2].toString().replace('$', '') : 0) || 0;
+        const status = row[3] ? row[3].trim() : '';
 
-    return interaction.editReply(
-      `📊 **Sheet Overview**\n--------------------\n🔢 **Total Entries:** ${rows.length}\n💵 **Total Earnings:** $${totalAmount.toFixed(2)}\n⏳ **Unpaid Amount:** $${unpaidAmount.toFixed(2)} (${unpaidCount} tasks)\n✅ **Paid Count:** ${paidCount} tasks`
-    );
+        totalAmount += amt;
+        if (status === 'Paid') paidCount++;
+        else if (status === 'Not Paid') { unpaidAmount += amt; unpaidCount++; }
+      });
+
+      return interaction.editReply(
+        `📊 **Captain Sheet Overview**\n--------------------\n🔢 **Total Entries:** ${rows.length}\n💵 **Total Earnings:** $${totalAmount.toFixed(2)}\n⏳ **Unpaid Amount:** $${unpaidAmount.toFixed(2)} (${unpaidCount} tasks)\n✅ **Paid Count:** ${paidCount} tasks`
+      );
+    } else {
+      let totalCredits = 0, paidCredits = 0, unpaidCredits = 0, paidCount = 0, unpaidCount = 0;
+
+      const creditsIdx = config.colLetters.credits.charCodeAt(0) - 'A'.charCodeAt(0);
+      const payIdx = config.colLetters.pay.charCodeAt(0) - 'A'.charCodeAt(0);
+
+      rows.forEach(row => {
+        const credits = parseFloat(row[creditsIdx] || 0) || 0;
+        const status = (row[payIdx] || '').trim().toUpperCase();
+
+        totalCredits += credits;
+        if (status === 'PAID') {
+          paidCredits += credits;
+          paidCount++;
+        } else {
+          unpaidCredits += credits;
+          unpaidCount++;
+        }
+      });
+
+      return interaction.editReply(
+        `📊 **Celebi Sheet Overview**\n--------------------\n🔢 **Total Entries:** ${rows.length}\n💳 **Total Credits:** ${totalCredits.toFixed(1)}\n⏳ **Unpaid Credits:** ${unpaidCredits.toFixed(1)} (${unpaidCount} tasks)\n✅ **Paid Credits:** ${paidCredits.toFixed(1)} (${paidCount} tasks)`
+      );
+    }
   }
 };
