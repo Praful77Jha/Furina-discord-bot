@@ -218,6 +218,30 @@ client.on('messageCreate', async (message) => {
 
       return message.reply(`✅ All **${rows.length}** rows updated to **Paid**!`);
     }
+    // -------------------------------------------------------------
+    // 3.5 !unpaidall -> Marks all existing data rows as "Not Paid"
+    // -------------------------------------------------------------
+    if (command === '!unpaidall') {
+      const sheetTitle = await getSheetTitle();
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: `'${sheetTitle}'!D2:D`
+      });
+
+      const rows = response.data.values || [];
+      if (rows.length === 0) return message.reply('ℹ️ No entries to update.');
+
+      const values = rows.map(() => ['Not Paid']);
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: `'${sheetTitle}'!D2:D${rows.length + 1}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values }
+      });
+
+      return message.reply(`🔄 All **${rows.length}** rows updated back to **Not Paid**!`);
+    }
 
     // -------------------------------------------------------------
     // 4. !unpaid -> List all unpaid rows
