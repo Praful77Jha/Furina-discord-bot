@@ -9,21 +9,56 @@ const auth = new google.auth.GoogleAuth({
 const sheets = google.sheets({ version: 'v4', auth });
 const HISTORY_SHEET_NAME = '_History';
 
-async function getSheetTitle() {
+// Multi-Sheet Configuration Object
+const SHEET_CONFIGS = {
+  captain: {
+    label: 'Captain',
+    spreadsheetId: process.env.SPREADSHEET_ID,
+    startRow: 2,
+    lastCol: 'E',
+    colLetters: {
+      date: 'A',
+      type: 'B',
+      amount: 'C',
+      pay: 'D',
+      link: 'E'
+    }
+  },
+  celebi: {
+    label: 'Celebi',
+    spreadsheetId: process.env.CELEBI_SPREADSHEET_ID || '1kVpKRdsQ1SjHaXdyKAm6UN6K45mlGW0GjoK6JifjdwA',
+    startRow: 11,
+    lastCol: 'H',
+    colLetters: {
+      provider: 'A',
+      date: 'B',
+      link: 'C',
+      account: 'D',
+      type: 'E',
+      credits: 'F',
+      status: 'G',
+      pay: 'H'
+    }
+  }
+};
+
+async function getSheetTitle(spreadsheetId = process.env.SPREADSHEET_ID) {
   const spreadsheet = await sheets.spreadsheets.get({
-    spreadsheetId: process.env.SPREADSHEET_ID
+    spreadsheetId
   });
   return spreadsheet.data.sheets[0].properties.title;
 }
 
-async function getLastDataRow() {
-  const sheetTitle = await getSheetTitle();
+async function getLastDataRow(spreadsheetId = process.env.SPREADSHEET_ID, sheetTitle, startRow = 2, checkCol = 'A') {
+  if (!sheetTitle) {
+    sheetTitle = await getSheetTitle(spreadsheetId);
+  }
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: process.env.SPREADSHEET_ID,
-    range: `'${sheetTitle}'!A:A`
+    spreadsheetId,
+    range: `'${sheetTitle}'!${checkCol}${startRow}:${checkCol}`
   });
   const rows = res.data.values || [];
-  return rows.length; // last row number that has data (row 1 = header)
+  return rows.length > 0 ? (startRow - 1) + rows.length : startRow - 1;
 }
 
 function detectTaskDetails(url, customAmount) {
@@ -52,15 +87,24 @@ function detectTaskDetails(url, customAmount) {
   return { taskType, amount: finalAmount };
 }
 
-// ---------- History / Undo system ----------
-// Every write-command logs {timestamp, user, command, range, oldValues, newValues}
-// to a hidden "_History" tab in the same spreadsheet. This survives bot restarts
-// (unlike an in-memory backup), and lets /undo reverse ANY logged change, not just
-// the last appended row.
+function detectCelebiTaskDetails(url) {
+  let taskType = 'OTHER PLATFORM COMMENT';
+  let credits = 0.2;
+  const link = url.toLowerCase();
 
-async function ensureHistorySheet() {
+  if (link.includes('reddit.com')) {
+    taskType = 'REDDIT COMMENT';
+    credits = 0.5;
+  }
+
+  return { taskType, credits };
+}
+
+// ---------- History / Undo system ----------
+
+async function ensureHistorySheet(spreadsheetId = process.env.SPREADSHEET_ID) {
   const spreadsheet = await sheets.spreadsheets.get({
-    spreadsheetId: process.env.SPREADSHEET_ID
+    spreadsheetId
   });
   const exists = spreadsheet.data.sheets.some(
     s => s.properties.title === HISTORY_SHEET_NAME
@@ -68,7 +112,7 @@ async function ensureHistorySheet() {
 
   if (!exists) {
     await sheets.spreadsheets.batchUpdate({
-      spreadsheetId: process.env.SPREADSHEET_ID,
+      spreadsheetId,
       requestBody: {
         requests: [{
           addSheet: {
@@ -78,7 +122,7 @@ async function ensureHistorySheet() {
       }
     });
     await sheets.spreadsheets.values.update({
-      spreadsheetId: process.env.SPREADSHEET_ID,
+      spreadsheetId,
       range: `'${HISTORY_SHEET_NAME}'!A1:F1`,
       valueInputOption: 'RAW',
       requestBody: {
@@ -88,10 +132,21 @@ async function ensureHistorySheet() {
   }
 }
 
-async function logHistory({ user, command, range, oldValues, newValues }) {
-  await ensureHistorySheet();
+async function logHistory(spreadsheetId, logData) {
+  // Support both legacy signature logHistory({ user, command... }) and logHistory(spreadsheetId, logData)
+  let targetId = spreadsheetId;
+  let data = logData;
+
+  if (typeof spreadsheetId === 'object') {
+    data = spreadsheetId;
+    targetId = process.env.SPREADSHEET_ID;
+  }
+
+  const { user, command, range, oldValues, newValues } = data;
+
+  await ensureHistorySheet(targetId);
   await sheets.spreadsheets.values.append({
-    spreadsheetId: process.env.SPREADSHEET_ID,
+    spreadsheetId: targetId,
     range: `'${HISTORY_SHEET_NAME}'!A:F`,
     valueInputOption: 'RAW',
     requestBody: {
@@ -107,39 +162,55 @@ async function logHistory({ user, command, range, oldValues, newValues }) {
   });
 }
 
-// Finds the most recent (non-cleared) history entry, optionally filtered to a
-// specific command name (e.g. only 'sadashiv pralaya' entries).
-async function findLastHistoryEntry(commandFilter) {
-  await ensureHistorySheet();
+async function findLastHistoryEntry(spreadsheetId, commandFilter) {
+  let targetId = spreadsheetId;
+  let filter = commandFilter;
+
+  if (typeof spreadsheetId !== 'string') {
+    filter = spreadsheetId;
+    targetId = process.env.SPREADSHEET_ID;
+  }
+
+  await ensureHistorySheet(targetId);
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: process.env.SPREADSHEET_ID,
+    spreadsheetId: targetId,
     range: `'${HISTORY_SHEET_NAME}'!A2:F`
   });
   const rows = res.data.values || [];
 
   for (let i = rows.length - 1; i >= 0; i--) {
     const row = rows[i];
-    if (!row || row.length === 0) continue; // skip already-undone (cleared) entries
+    if (!row || row.length === 0) continue;
     const command = row[2];
-    if (!commandFilter || command === commandFilter) {
-      return { rowIndex: i + 2, entry: row }; // +2: row 1 is header, arrays are 0-indexed
+    if (!filter || command === filter) {
+      return { rowIndex: i + 2, entry: row };
     }
   }
   return null;
 }
 
-async function removeHistoryEntry(rowIndex) {
+async function removeHistoryEntry(spreadsheetId, rowIndex) {
+  let targetId = spreadsheetId;
+  let index = rowIndex;
+
+  if (typeof spreadsheetId === 'number') {
+    index = spreadsheetId;
+    targetId = process.env.SPREADSHEET_ID;
+  }
+
   await sheets.spreadsheets.values.clear({
-    spreadsheetId: process.env.SPREADSHEET_ID,
-    range: `'${HISTORY_SHEET_NAME}'!A${rowIndex}:F${rowIndex}`
+    spreadsheetId: targetId,
+    range: `'${HISTORY_SHEET_NAME}'!A${index}:F${index}`
   });
 }
 
 module.exports = {
   sheets,
+  SHEET_CONFIGS,
   getSheetTitle,
   getLastDataRow,
   detectTaskDetails,
+  detectCelebiTaskDetails,
   logHistory,
   findLastHistoryEntry,
   removeHistoryEntry
