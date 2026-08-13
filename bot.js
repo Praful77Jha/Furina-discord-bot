@@ -219,33 +219,10 @@ client.on('messageCreate', async (message) => {
       return message.reply(`✅ All **${rows.length}** rows updated to **Paid**!`);
     }
     // -------------------------------------------------------------
-    // 3.5 !unpaidall -> Marks all existing data rows as "Not Paid"
+    // 4. UNPAID MANAGEMENT: Listing & Status Updates
     // -------------------------------------------------------------
-    if (command === '!unpaidall') {
-      const sheetTitle = await getSheetTitle();
-      const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: process.env.SPREADSHEET_ID,
-        range: `'${sheetTitle}'!D2:D`
-      });
-
-      const rows = response.data.values || [];
-      if (rows.length === 0) return message.reply('ℹ️ No entries to update.');
-
-      const values = rows.map(() => ['Not Paid']);
-
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: process.env.SPREADSHEET_ID,
-        range: `'${sheetTitle}'!D2:D${rows.length + 1}`,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values }
-      });
-
-      return message.reply(`🔄 All **${rows.length}** rows updated back to **Not Paid**!`);
-    }
-
-    // -------------------------------------------------------------
-    // 4. !unpaid -> List all unpaid rows
-    // -------------------------------------------------------------
+    
+    // 4a. !unpaid -> List all unpaid rows
     if (command === '!unpaid') {
       const sheetTitle = await getSheetTitle();
       const response = await sheets.spreadsheets.values.get({
@@ -268,6 +245,67 @@ client.on('messageCreate', async (message) => {
       }
 
       return message.reply(`⏳ **Unpaid Tasks (${unpaidRows.length}):**\n` + unpaidRows.slice(0, 15).join('\n') + (unpaidRows.length > 15 ? '\n*...and more*' : ''));
+    }
+
+    // 4b. !setunpaid <row> -> Mark single row as "Not Paid"
+    if (command === '!setunpaid') {
+      const rowNum = parseInt(args[1]);
+      if (isNaN(rowNum) || rowNum < 2) return message.reply('⚠️ **Usage:** `!setunpaid <RowNumber>` (e.g., `!setunpaid 2`)');
+
+      const sheetTitle = await getSheetTitle();
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: `'${sheetTitle}'!D${rowNum}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [['Not Paid']] }
+      });
+
+      return message.reply(`🔄 Row **${rowNum}** updated back to **Not Paid**!`);
+    }
+
+    // 4c. !unpaidrange <start> <end> -> Batch mark range as "Not Paid"
+    if (command === '!unpaidrange') {
+      const start = parseInt(args[1]);
+      const end = parseInt(args[2]);
+
+      if (isNaN(start) || isNaN(end) || start > end || start < 2) {
+        return message.reply('⚠️ **Usage:** `!unpaidrange <StartRow> <EndRow>` (e.g., `!unpaidrange 2 10`)');
+      }
+
+      const sheetTitle = await getSheetTitle();
+      const values = Array(end - start + 1).fill(['Not Paid']);
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: `'${sheetTitle}'!D${start}:D${end}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values }
+      });
+
+      return message.reply(`🔄 Rows **${start} to ${end}** updated back to **Not Paid**!`);
+    }
+
+    // 4d. !unpaidall -> Mark all rows as "Not Paid"
+    if (command === '!unpaidall') {
+      const sheetTitle = await getSheetTitle();
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: `'${sheetTitle}'!D2:D`
+      });
+
+      const rows = response.data.values || [];
+      if (rows.length === 0) return message.reply('ℹ️ No entries to update.');
+
+      const values = rows.map(() => ['Not Paid']);
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: `'${sheetTitle}'!D2:D${rows.length + 1}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values }
+      });
+
+      return message.reply(`🔄 All **${rows.length}** rows updated back to **Not Paid**!`);
     }
 
     // -------------------------------------------------------------
