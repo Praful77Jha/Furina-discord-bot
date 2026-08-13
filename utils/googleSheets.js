@@ -93,7 +93,7 @@ async function logHistory({ user, command, range, oldValues, newValues }) {
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.SPREADSHEET_ID,
     range: `'${HISTORY_SHEET_NAME}'!A:F`,
-    valueInputOption: 'USER_ENTERED',
+    valueInputOption: 'RAW',
     requestBody: {
       values: [[
         new Date().toISOString(),
