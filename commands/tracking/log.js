@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sheets, getSheetTitle, detectTaskDetails } = require('../../utils/googleSheets');
+const { sheets, getSheetTitle, detectTaskDetails, logHistory } = require('../../utils/googleSheets');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -28,12 +28,23 @@ module.exports = {
     const { taskType, amount } = detectTaskDetails(link, customAmount);
     const today = new Date();
     const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+    const newRow = [formattedDate, taskType, amount, 'Not Paid', link];
 
-    await sheets.spreadsheets.values.append({
+    const appendRes = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
       range: `'${sheetTitle}'!A:E`,
       valueInputOption: 'USER_ENTERED',
-      requestBody: { values: [[formattedDate, taskType, amount, 'Not Paid', link]] }
+      requestBody: { values: [newRow] }
+    });
+
+    // updatedRange looks like "'Sheet1'!A12:E12" — use it so /undo clears exactly this row.
+    const updatedRange = appendRes.data.updates.updatedRange;
+    await logHistory({
+      user: interaction.user.tag,
+      command: 'log',
+      range: updatedRange,
+      oldValues: [],
+      newValues: [newRow]
     });
 
     return interaction.editReply(`✅ **Logged!**\n📅 **Date:** ${formattedDate}\n📝 **Type:** ${taskType}\n💵 **Amount:** $${amount.toFixed(2)}\n🔗 **Link:** ${link}`);

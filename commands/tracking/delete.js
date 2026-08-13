@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { sheets, getSheetTitle } = require('../../utils/googleSheets');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sheets, getSheetTitle, logHistory } = require('../../utils/googleSheets');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('delete')
-    .setDescription('Clear a specific row')
+    .setDescription('Clear a specific row or column')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addIntegerOption(option => option.setName('row').setDescription('Row number to delete').setRequired(true))
     .addStringOption(option => option.setName('column').setDescription('Single column letter (e.g. A)').setRequired(false)),
 
@@ -16,23 +17,39 @@ module.exports = {
 
     const sheetTitle = await getSheetTitle();
 
+    let range;
+    let col = null;
     if (column) {
-      const col = column.trim().toUpperCase();
+      col = column.trim().toUpperCase();
       if (!/^[A-Z]$/.test(col)) return interaction.editReply('⚠️ Column must be a single letter (e.g. A).');
-
-      await sheets.spreadsheets.values.clear({
-        spreadsheetId: process.env.SPREADSHEET_ID,
-        range: `'${sheetTitle}'!${col}2:${col}${rowNum}`
-      });
-
-      return interaction.editReply(`🗑️ Column **${col}** cleared from row 2 to ${rowNum}!`);
+      range = `'${sheetTitle}'!${col}2:${col}${rowNum}`;
+    } else {
+      range = `'${sheetTitle}'!A${rowNum}:E${rowNum}`;
     }
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: process.env.SPREADSHEET_ID,
+      range
+    });
+    const oldValues = res.data.values || [];
+
+    await logHistory({
+      user: interaction.user.tag,
+      command: col ? 'delete column' : 'delete row',
+      range,
+      oldValues,
+      newValues: []
+    });
 
     await sheets.spreadsheets.values.clear({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: `'${sheetTitle}'!A${rowNum}:E${rowNum}`
+      range
     });
 
-    return interaction.editReply(`🗑️ Row **${rowNum}** cleared!`);
+    return interaction.editReply(
+      col
+        ? `🗑️ Column **${col}** cleared from row 2 to ${rowNum}!`
+        : `🗑️ Row **${rowNum}** cleared!`
+    );
   }
 };
