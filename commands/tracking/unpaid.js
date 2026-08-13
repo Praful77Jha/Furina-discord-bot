@@ -9,17 +9,22 @@ module.exports = {
     .addIntegerOption(option => option.setName('row').setDescription('Set single row to Not Paid'))
     .addIntegerOption(option => option.setName('start').setDescription('Start row for range'))
     .addIntegerOption(option => option.setName('end').setDescription('End row for range'))
-    .addBooleanOption(option => option.setName('all').setDescription('Mark ALL rows as Not Paid')),
+    .addStringOption(option => 
+      option
+        .setName('all')
+        .setDescription('Mark ALL rows as Not Paid')
+        .addChoices({ name: 'all', value: 'all' })
+    ),
 
   async execute(interaction) {
     await interaction.deferReply();
     const row = interaction.options.getInteger('row');
     const start = interaction.options.getInteger('start');
     const end = interaction.options.getInteger('end');
-    const all = interaction.options.getBoolean('all');
+    const all = interaction.options.getString('all');
     const sheetTitle = await getSheetTitle();
 
-    if (all) {
+    if (all === 'all') {
       const res = await sheets.spreadsheets.values.get({ spreadsheetId: process.env.SPREADSHEET_ID, range: `'${sheetTitle}'!D2:D` });
       const rows = res.data.values || [];
       if (rows.length === 0) return interaction.editReply('ℹ️ No entries to update.');
