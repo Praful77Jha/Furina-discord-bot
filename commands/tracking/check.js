@@ -1,22 +1,29 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle } = require('../../utils/googleSheets');
+
+// Finds which sheet key (captain/celebi) this channel is wired to.
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('check')
-    .setDescription('Check if a link exists in the selected spreadsheet')
-    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
-      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' }))
+    .setDescription('Check if a link exists in the sheet for this channel')
     .addStringOption(option => option.setName('link').setDescription('The link to search for').setRequired(true)),
 
   async execute(interaction) {
     await interaction.deferReply();
-    const sheetKey = interaction.options.getString('sheet');
-    const config = SHEET_CONFIGS[sheetKey];
-    if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
 
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
+    const config = SHEET_CONFIGS[sheetKey];
+
+    if (!config.spreadsheetId) {
+      return interaction.editReply(`⚠️ **${config.label}** sheet is not configured (missing spreadsheet ID env var).`);
+    }
 
     const targetLink = interaction.options.getString('link').trim();
     const sheetTitle = await getSheetTitle(config.spreadsheetId);

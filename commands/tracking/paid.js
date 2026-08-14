@@ -1,32 +1,33 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, getLastDataRow, logHistory } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle, getLastDataRow, logHistory } = require('../../utils/googleSheets');
 
-function sheetOption(sub) {
-  return sub.addStringOption(opt => opt.setName('sheet').setDescription('Target sheet').setRequired(true)
-    .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' }));
+// Finds which sheet key (captain/celebi) this channel is wired to.
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
 }
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('paid')
-    .setDescription('Mark entries as Paid')
+    .setDescription('Mark entries as Paid in the sheet for this channel')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addSubcommand(sub => sheetOption(sub.setName('all').setDescription('Mark ALL rows as Paid')))
-    .addSubcommand(sub => sheetOption(sub.setName('row').setDescription('Mark a single row')
-      .addIntegerOption(opt => opt.setName('number').setDescription('Row number').setRequired(true))))
-    .addSubcommand(sub => sheetOption(sub.setName('range').setDescription('Mark a range of rows')
+    .addSubcommand(sub => sub.setName('all').setDescription('Mark ALL rows as Paid'))
+    .addSubcommand(sub => sub.setName('row').setDescription('Mark a single row')
+      .addIntegerOption(opt => opt.setName('number').setDescription('Row number').setRequired(true)))
+    .addSubcommand(sub => sub.setName('range').setDescription('Mark a range of rows')
       .addIntegerOption(opt => opt.setName('start').setDescription('Start row').setRequired(true))
-      .addIntegerOption(opt => opt.setName('end').setDescription('End row').setRequired(true)))),
+      .addIntegerOption(opt => opt.setName('end').setDescription('End row').setRequired(true))),
 
   async execute(interaction) {
     await interaction.deferReply();
     const subcommand = interaction.options.getSubcommand();
-    const sheetKey = interaction.options.getString('sheet');
+
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured (missing spreadsheet ID env var).`);
-
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
 
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
     const payCol = config.colLetters.pay || config.colLetters.status;

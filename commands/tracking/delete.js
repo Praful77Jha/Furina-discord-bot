@@ -1,24 +1,31 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, logHistory } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle, logHistory } = require('../../utils/googleSheets');
+
+// Finds which sheet key (captain/celebi) this channel is wired to.
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('delete')
-    .setDescription('Clear a specific row or column')
+    .setDescription('Clear a specific row or column in the sheet for this channel')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
-      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' }))
     .addIntegerOption(option => option.setName('row').setDescription('Row number to delete').setRequired(true))
     .addStringOption(option => option.setName('column').setDescription('Single column letter (e.g. A)').setRequired(false)),
 
   async execute(interaction) {
     await interaction.deferReply();
-    const sheetKey = interaction.options.getString('sheet');
-    const config = SHEET_CONFIGS[sheetKey];
-    if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
 
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
+    const config = SHEET_CONFIGS[sheetKey];
+
+    if (!config.spreadsheetId) {
+      return interaction.editReply(`⚠️ **${config.label}** sheet is not configured (missing spreadsheet ID env var).`);
+    }
 
     const rowNum = interaction.options.getInteger('row');
     const column = interaction.options.getString('column');

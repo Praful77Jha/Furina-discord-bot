@@ -1,13 +1,16 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, getLastDataRow, detectTaskDetails, detectCelebiTaskDetails, logHistory } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle, getLastDataRow, detectTaskDetails, detectCelebiTaskDetails, logHistory } = require('../../utils/googleSheets');
+
+// Finds which sheet key (captain/celebi) this channel is wired to.
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('log')
     .setDescription('Log a new task entry')
     .addStringOption(option => option.setName('link').setDescription('The task link').setRequired(true))
-    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
-      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' }))
     .addStringOption(option => option.setName('provider').setDescription('Task provider (Celebi only)')
       .addChoices({ name: 'ELECTRO/FERALIGATOR', value: 'ELECTRO/FERALIGATOR' }, { name: 'CELEBI', value: 'CELEBI' }))
     .addStringOption(option => option.setName('account').setDescription('Account (Celebi only)')
@@ -21,17 +24,18 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply();
-    const link = interaction.options.getString('link');
-    const sheetKey = interaction.options.getString('sheet');
+
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
     const config = SHEET_CONFIGS[sheetKey];
 
     if (!config.spreadsheetId) {
       return interaction.editReply(`⚠️ **${config.label}** sheet is not configured (missing spreadsheet ID env var).`);
     }
 
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
-
+    const link = interaction.options.getString('link');
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
 
     // Duplicate link check (scanned from the sheet's real data start row)
@@ -67,8 +71,6 @@ module.exports = {
       replyText = `✅ **Logged to Celebi!**\n🏷️ **Provider:** ${provider}\n📅 **Date:** ${formattedDate}\n👤 **Account:** ${account}\n📝 **Type:** ${taskType}\n💳 **Credits:** ${credits}\n🔗 **Link:** ${link}`;
     }
 
-    // Write to the next empty row after the table (found from startRow, so
-    // header/label content above the table on sheets like Celebi is ignored).
     const lastRow = await getLastDataRow(config.spreadsheetId, sheetTitle, config.startRow, config.colLetters.provider || config.colLetters.date);
     const nextRow = Math.max(lastRow + 1, config.startRow);
     const range = `'${sheetTitle}'!A${nextRow}:${config.lastCol}${nextRow}`;

@@ -1,22 +1,25 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, findLastHistoryEntry, removeHistoryEntry } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, findLastHistoryEntry, removeHistoryEntry } = require('../../utils/googleSheets');
+
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('undo')
-    .setDescription('Undo the last change made to the sheet')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
-      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' })),
+    .setDescription('Undo the last change made to the sheet for this channel')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
   async execute(interaction) {
     await interaction.deferReply();
-    const sheetKey = interaction.options.getString('sheet');
+
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
-
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
 
     const last = await findLastHistoryEntry(config.spreadsheetId);
     if (!last) return interaction.editReply(`⚠️ No changes available to undo on **${config.label}**.`);

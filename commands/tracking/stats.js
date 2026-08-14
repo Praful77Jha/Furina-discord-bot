@@ -1,21 +1,24 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle } = require('../../utils/googleSheets');
+
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
-    .setDescription('View sheet overview and metrics')
-    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
-      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' })),
+    .setDescription('View sheet overview and metrics for this channel'),
 
   async execute(interaction) {
     await interaction.deferReply();
-    const sheetKey = interaction.options.getString('sheet');
+
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
-
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
 
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
     const response = await sheets.spreadsheets.values.get({

@@ -1,13 +1,15 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, logHistory, findLastHistoryEntry, removeHistoryEntry } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, getSheetTitle, logHistory, findLastHistoryEntry, removeHistoryEntry } = require('../../utils/googleSheets');
+
+function resolveSheetKey(channelId) {
+  return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sadashiv')
     .setDescription('Commands of cosmic dissolution and restoration')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addStringOption(option => option.setName('sheet').setDescription('Target sheet').setRequired(true)
-      .addChoices({ name: 'Captain', value: 'captain' }, { name: 'Celebi', value: 'celebi' }))
     .addStringOption(option =>
       option.setName('action')
         .setDescription('Choose the act to perform')
@@ -20,12 +22,13 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply();
-    const sheetKey = interaction.options.getString('sheet');
+
+    const sheetKey = resolveSheetKey(interaction.channelId);
+    if (!sheetKey) {
+      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
+    }
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
-
-    const channelError = checkChannel(interaction, config);
-    if (channelError) return interaction.editReply(channelError);
 
     const action = interaction.options.getString('action');
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
@@ -53,7 +56,7 @@ module.exports = {
         range
       });
 
-      return interaction.editReply(`🔱 **PRALAYA EXECUTED [${config.label}]:** All table data starting from row ${config.startRow} has been dissolved into empty space!\n💡 *Use \`/sadashiv sheet:${sheetKey} action:restore (Srishti)\` to restore.*`);
+      return interaction.editReply(`🔱 **PRALAYA EXECUTED [${config.label}]:** All table data starting from row ${config.startRow} has been dissolved into empty space!\n💡 *Use \`/sadashiv action:restore (Srishti)\` in this same channel to restore.*`);
     }
 
     // Undo Deletion: Srishti (Restoration/Recreation)
