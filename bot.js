@@ -63,11 +63,17 @@ client.on('interactionCreate', async (interaction) => {
     await command.execute(interaction);
   } catch (error) {
     console.error(error);
-    const replyOptions = { content: `❌ Error: ${error.message}`, ephemeral: true };
-    if (interaction.deferred || interaction.replied) {
-      await interaction.editReply(replyOptions);
-    } else {
-      await interaction.reply(replyOptions);
+    const replyOptions = { content: `❌ Error: ${error.message}`, flags: 64 };
+    try {
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply(replyOptions);
+      } else {
+        await interaction.reply(replyOptions);
+      }
+    } catch (followUpError) {
+      // Interaction was already invalid/acknowledged elsewhere (e.g. two bot
+      // instances running at once) - log it but don't crash the process.
+      console.error('Failed to send error reply:', followUpError.message);
     }
   }
 });
