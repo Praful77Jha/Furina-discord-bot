@@ -1,11 +1,19 @@
 const { google } = require('googleapis');
 const path = require('path');
+const fs = require('fs');
 
-const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, '../credentials.json'),
-  scopes: ['https://www.googleapis.com/auth/spreadsheets']
-});
+const credsPath = path.join(__dirname, '../credentials.json');
+const authOptions = { scopes: ['https://www.googleapis.com/auth/spreadsheets'] };
 
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+} else if (fs.existsSync(credsPath)) {
+  authOptions.keyFile = credsPath;
+} else {
+  throw new Error('Missing Google credentials: set GOOGLE_CREDENTIALS_JSON env var or add credentials.json locally.');
+}
+
+const auth = new google.auth.GoogleAuth(authOptions);
 const sheets = google.sheets({ version: 'v4', auth });
 const HISTORY_SHEET_NAME = '_History';
 
