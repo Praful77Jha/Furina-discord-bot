@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, getSheetTitle, logHistory } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, logHistory } = require('../../utils/googleSheets');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,6 +16,9 @@ module.exports = {
     const sheetKey = interaction.options.getString('sheet');
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
+
+    const channelError = checkChannel(interaction, config);
+    if (channelError) return interaction.editReply(channelError);
 
     const rowNum = interaction.options.getInteger('row');
     const column = interaction.options.getString('column');

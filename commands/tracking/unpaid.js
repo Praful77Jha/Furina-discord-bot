@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, getSheetTitle, getLastDataRow, logHistory } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, getLastDataRow, logHistory } = require('../../utils/googleSheets');
 
 function sheetOption(sub) {
   return sub.addStringOption(opt => opt.setName('sheet').setDescription('Target sheet').setRequired(true)
@@ -25,6 +25,9 @@ module.exports = {
     const sheetKey = interaction.options.getString('sheet');
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured (missing spreadsheet ID env var).`);
+
+    const channelError = checkChannel(interaction, config);
+    if (channelError) return interaction.editReply(channelError);
 
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
     const payCol = config.colLetters.pay || config.colLetters.status;

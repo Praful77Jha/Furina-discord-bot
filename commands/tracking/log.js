@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { sheets, SHEET_CONFIGS, getSheetTitle, getLastDataRow, detectTaskDetails, detectCelebiTaskDetails, logHistory } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, checkChannel, getSheetTitle, getLastDataRow, detectTaskDetails, detectCelebiTaskDetails, logHistory } = require('../../utils/googleSheets');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -28,6 +28,9 @@ module.exports = {
     if (!config.spreadsheetId) {
       return interaction.editReply(`⚠️ **${config.label}** sheet is not configured (missing spreadsheet ID env var).`);
     }
+
+    const channelError = checkChannel(interaction, config);
+    if (channelError) return interaction.editReply(channelError);
 
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
 

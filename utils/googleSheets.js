@@ -2,6 +2,9 @@ const { google } = require('googleapis');
 const path = require('path');
 const fs = require('fs');
 
+// Prefer GOOGLE_CREDENTIALS_JSON (the full service-account JSON pasted as one
+// env var) so this works on hosts that deploy from git and never see
+// credentials.json. Falls back to the local file for local dev.
 const credsPath = path.join(__dirname, '../credentials.json');
 const authOptions = { scopes: ['https://www.googleapis.com/auth/spreadsheets'] };
 
@@ -14,6 +17,7 @@ if (process.env.GOOGLE_CREDENTIALS_JSON) {
 }
 
 const auth = new google.auth.GoogleAuth(authOptions);
+
 const sheets = google.sheets({ version: 'v4', auth });
 const HISTORY_SHEET_NAME = '_History';
 
@@ -22,6 +26,7 @@ const SHEET_CONFIGS = {
   captain: {
     label: 'Captain',
     spreadsheetId: process.env.SPREADSHEET_ID,
+    channelId: process.env.CAPTAIN_CHANNEL_ID,
     startRow: 2,
     lastCol: 'E',
     colLetters: {
@@ -34,7 +39,8 @@ const SHEET_CONFIGS = {
   },
   celebi: {
     label: 'Celebi',
-    spreadsheetId: process.env.CELEBI_SPREADSHEET_ID || '1kVpKRdsQ1SjHaXdyKAm6UN6K45mlGW0GjoK6JifjdwA',
+    spreadsheetId: process.env.CELEBI_SPREADSHEET_ID,
+    channelId: process.env.CELEBI_CHANNEL_ID,
     startRow: 11,
     lastCol: 'H',
     colLetters: {
@@ -49,6 +55,15 @@ const SHEET_CONFIGS = {
     }
   }
 };
+
+// Returns null if the command is running in the right channel for that
+// sheet, or an error string to reply with if it isn't.
+function checkChannel(interaction, config) {
+  if (config.channelId && interaction.channelId !== config.channelId) {
+    return `⚠️ **${config.label}** commands can only be used in <#${config.channelId}>.`;
+  }
+  return null;
+}
 
 async function getSheetTitle(spreadsheetId = process.env.SPREADSHEET_ID) {
   const spreadsheet = await sheets.spreadsheets.get({
@@ -215,6 +230,7 @@ async function removeHistoryEntry(spreadsheetId, rowIndex) {
 module.exports = {
   sheets,
   SHEET_CONFIGS,
+  checkChannel,
   getSheetTitle,
   getLastDataRow,
   detectTaskDetails,

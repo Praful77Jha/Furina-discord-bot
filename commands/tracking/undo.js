@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, findLastHistoryEntry, removeHistoryEntry } = require('../../utils/googleSheets');
+const { sheets, SHEET_CONFIGS, checkChannel, findLastHistoryEntry, removeHistoryEntry } = require('../../utils/googleSheets');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,6 +14,9 @@ module.exports = {
     const sheetKey = interaction.options.getString('sheet');
     const config = SHEET_CONFIGS[sheetKey];
     if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
+
+    const channelError = checkChannel(interaction, config);
+    if (channelError) return interaction.editReply(channelError);
 
     const last = await findLastHistoryEntry(config.spreadsheetId);
     if (!last) return interaction.editReply(`⚠️ No changes available to undo on **${config.label}**.`);
