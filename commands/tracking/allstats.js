@@ -29,13 +29,11 @@ function parseTaskDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-// Span in whole days between the oldest and newest date in the list.
-function daySpan(dates) {
+// Number of distinct calendar days that have at least one unpaid task.
+function distinctDayCount(dates) {
   if (dates.length === 0) return null;
-  const times = dates.map(d => d.getTime());
-  const min = Math.min(...times);
-  const max = Math.max(...times);
-  return Math.round((max - min) / (1000 * 60 * 60 * 24));
+  const uniqueDays = new Set(dates.map(d => d.toDateString()));
+  return uniqueDays.size;
 }
 
 // Fetches one sheet's real rows and returns { entryCount, unpaidAmount, unpaidDates }.
@@ -101,10 +99,11 @@ module.exports = {
       const totalEntries = captain.entryCount + celebi.entryCount;
       const totalUnpaid = captain.unpaidAmount + celebi.unpaidAmount;
       const totalUnpaidInr = totalUnpaid * usdToInrRate;
-     const allUnpaidDates = [...captain.unpaidDates, ...celebi.unpaidDates];
-      const overallSpan = daySpan(allUnpaidDates);
-      const captainSpan = daySpan(captain.unpaidDates);
-      const celebiSpan = daySpan(celebi.unpaidDates);
+      const allUnpaidDates = [...captain.unpaidDates, ...celebi.unpaidDates];
+
+      const overallSpan = distinctDayCount(allUnpaidDates);
+      const captainSpan = distinctDayCount(captain.unpaidDates);
+      const celebiSpan = distinctDayCount(celebi.unpaidDates);
       const fmtSpan = (span) => span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
 
       return interaction.editReply(
