@@ -60,13 +60,16 @@ module.exports = {
 
     if (subcommand === 'all') {
       if (lastRow < config.startRow) return interaction.editReply('ℹ️ No entries to update.');
-      const range = `'${sheetTitle}'!${payCol}${config.startRow}:${payCol}${lastRow}`;
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
-      const rows = res.data.values || [];
-      if (rows.length === 0) return interaction.editReply('ℹ️ No entries to update.');
 
-      const newValues = rows.map(() => [notPaidValue]);
-      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid all', range, oldValues: rows, newValues });
+      const count = lastRow - config.startRow + 1;
+      const range = `'${sheetTitle}'!${payCol}${config.startRow}:${payCol}${lastRow}`;
+
+      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
+      const oldValues = res.data.values || [];
+      while (oldValues.length < count) oldValues.push(['']);
+
+      const newValues = Array(count).fill([notPaidValue]);
+      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid all', range, oldValues, newValues });
 
       await sheets.spreadsheets.values.update({
         spreadsheetId: config.spreadsheetId,
@@ -74,7 +77,7 @@ module.exports = {
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: newValues }
       });
-      return interaction.editReply(`🔄 [${config.label}] All **${rows.length}** rows updated back to **Not Paid**!`);
+      return interaction.editReply(`🔄 [${config.label}] All **${count}** rows updated back to **Not Paid**!`);
     }
 
     if (subcommand === 'row') {

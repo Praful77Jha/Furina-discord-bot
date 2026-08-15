@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { sheets, SHEET_CONFIGS, getSheetTitle, getLastDataRow, logHistory } = require('../../utils/googleSheets');
 
-// Finds which sheet key (captain/celebi) this channel is wired to.
 function resolveSheetKey(channelId) {
   return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
 }
@@ -36,13 +35,19 @@ module.exports = {
 
     if (subcommand === 'all') {
       if (lastRow < config.startRow) return interaction.editReply('ℹ️ No entries to update.');
-      const range = `'${sheetTitle}'!${payCol}${config.startRow}:${payCol}${lastRow}`;
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
-      const rows = res.data.values || [];
-      if (rows.length === 0) return interaction.editReply('ℹ️ No entries to update.');
 
-      const newValues = rows.map(() => [paidValue]);
-      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'paid all', range, oldValues: rows, newValues });
+      // Count real rows from the row range itself, NOT from reading the pay
+      // column - Sheets' API trims trailing empty cells from values.get, so
+      // an all-blank Pay column (like Celebi's) would otherwise read as 0.
+      const count = lastRow - config.startRow + 1;
+      const range = `'${sheetTitle}'!${payCol}${config.startRow}:${payCol}${lastRow}`;
+
+      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
+      const oldValues = res.data.values || [];
+      while (oldValues.length < count) oldValues.push(['']);
+
+      const newValues = Array(count).fill([paidValue]);
+      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'paid all', range, oldValues, newValues });
 
       await sheets.spreadsheets.values.update({
         spreadsheetId: config.spreadsheetId,
@@ -50,7 +55,7 @@ module.exports = {
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: newValues }
       });
-      return interaction.editReply(`✅ [${config.label}] All **${rows.length}** rows marked as **Paid**!`);
+      return interaction.editReply(`✅ [${config.label}] All **${count}** rows marked as **Paid**!`);
     }
 
     if (subcommand === 'row') {
