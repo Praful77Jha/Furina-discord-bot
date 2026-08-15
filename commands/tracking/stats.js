@@ -22,6 +22,26 @@ async function getUsdToInrRate() {
   return rate;
 }
 
+// Dates are stored as "M/D/YYYY" strings (see log.js). Returns a Date or null.
+function parseTaskDate(str) {
+  if (!str) return null;
+  const parts = str.toString().trim().split('/');
+  if (parts.length !== 3) return null;
+  const [month, day, year] = parts.map(n => parseInt(n, 10));
+  if (!month || !day || !year) return null;
+  const d = new Date(year, month - 1, day);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Span in whole days between the oldest and newest date in the list.
+function daySpan(dates) {
+  if (dates.length === 0) return null;
+  const times = dates.map(d => d.getTime());
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  return Math.round((max - min) / (1000 * 60 * 60 * 24));
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
@@ -70,6 +90,7 @@ module.exports = {
 
         let unpaidAmount = 0;
         let unpaidCount = 0;
+        const unpaidDates = [];
 
         realRows.forEach(row => {
           const amount =
@@ -86,17 +107,22 @@ module.exports = {
           if (status === 'Not Paid') {
             unpaidAmount += amount;
             unpaidCount++;
+            const date = parseTaskDate(row[0]); // Column A = Date
+            if (date) unpaidDates.push(date);
           }
         });
 
         const unpaidInr = unpaidAmount * usdToInrRate;
+        const span = daySpan(unpaidDates);
+        const spanText = span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
 
         return interaction.editReply(
           `📊 **Captain Sheet Overview**\n` +
           `--------------------\n` +
           `🔢 **Total Entries:** ${realRows.length}\n` +
           `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)} (${unpaidCount} tasks)\n` +
-          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})`
+          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
+          `📅 **Total Days:** ${spanText}`
         );
       }
 
@@ -121,6 +147,7 @@ module.exports = {
 
       let unpaidCredits = 0;
       let unpaidCount = 0;
+      const unpaidDates = [];
 
       realRows.forEach(row => {
         const credits =
@@ -135,17 +162,22 @@ module.exports = {
         if (status !== 'PAID') {
           unpaidCredits += credits;
           unpaidCount++;
+          const date = parseTaskDate(row[1]); // Column B = Date
+          if (date) unpaidDates.push(date);
         }
       });
 
       const unpaidInr = unpaidCredits * usdToInrRate;
+      const span = daySpan(unpaidDates);
+      const spanText = span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
 
       return interaction.editReply(
         `📊 **Celebi Sheet Overview**\n` +
         `--------------------\n` +
         `🔢 **Total Entries:** ${realRows.length}\n` +
         `💰 **Unpaid Credits:** $${unpaidCredits.toFixed(2)} (${unpaidCount} tasks)\n` +
-        `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})`
+        `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
+        `📅 **Total Days:** ${spanText}`
       );
 
     } catch (error) {
