@@ -94,14 +94,14 @@ module.exports = {
 
       const attachment = new AttachmentBuilder(qrPath, { name: app.file });
 
-      return interaction.editReply({
+    return interaction.editReply({
         content:
           `🙏 **Dakshina — ${config.label} Sheet**\n` +
           `--------------------\n` +
-          `📱 **App:** ${app.label}\n` +
-          `🆔 **UPI ID:** \`${app.upi}\`\n` +
           `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n` +
-          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})`,
+          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
+          `📱 **App:** ${app.label}\n` +
+          `🆔 **UPI ID:** \`${app.upi}\``,
         files: [attachment]
       });
     } catch (error) {
