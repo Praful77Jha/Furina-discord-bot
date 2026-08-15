@@ -101,9 +101,11 @@ module.exports = {
       const totalEntries = captain.entryCount + celebi.entryCount;
       const totalUnpaid = captain.unpaidAmount + celebi.unpaidAmount;
       const totalUnpaidInr = totalUnpaid * usdToInrRate;
-      const allUnpaidDates = [...captain.unpaidDates, ...celebi.unpaidDates];
-      const span = daySpan(allUnpaidDates);
-      const spanText = span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
+     const allUnpaidDates = [...captain.unpaidDates, ...celebi.unpaidDates];
+      const overallSpan = daySpan(allUnpaidDates);
+      const captainSpan = daySpan(captain.unpaidDates);
+      const celebiSpan = daySpan(celebi.unpaidDates);
+      const fmtSpan = (span) => span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
 
       return interaction.editReply(
         `📊 **All Sheets Overview**\n` +
@@ -111,7 +113,7 @@ module.exports = {
         `🔢 **Total Entries:** ${totalEntries} (Captain: ${captain.entryCount}, Celebi: ${celebi.entryCount})\n` +
         `💰 **Total Unpaid:** $${totalUnpaid.toFixed(2)}\n` +
         `🇮🇳 **Total Unpaid in INR:** ₹${totalUnpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
-        `📅 **Total Days:** ${spanText}`
+        `📅 **Total Days:** ${fmtSpan(overallSpan)} (Captain: ${fmtSpan(captainSpan)}, Celebi: ${fmtSpan(celebiSpan)})`
       );
     } catch (error) {
       console.error('Allstats command error:', error);
