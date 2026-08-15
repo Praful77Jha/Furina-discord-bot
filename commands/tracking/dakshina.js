@@ -97,11 +97,11 @@ module.exports = {
     return interaction.editReply({
         content:
           `🙏 **Dakshina — ${config.label} Sheet**\n` +
-          `--------------------\n` +
+          `--------------------\n\n\n` +
           `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n` +
-          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
-          `📱 **App:** ${app.label}\n` +
-          `🆔 **UPI ID:** \`${app.upi}\``,
+          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n\n\n` +
+          `🆔 **UPI ID:** \`${app.upi}\`\n\n\n` +
+          `📄 **Sheet:** https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit`,
         files: [attachment]
       });
     } catch (error) {
