@@ -5,6 +5,23 @@ function resolveSheetKey(channelId) {
   return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
 }
 
+async function getUsdToInrRate() {
+  const response = await fetch('https://open.er-api.com/v6/latest/USD');
+
+  if (!response.ok) {
+    throw new Error(`Exchange rate request failed with HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const rate = Number(data?.rates?.INR);
+
+  if (!Number.isFinite(rate) || rate <= 0) {
+    throw new Error('USD to INR exchange rate was not returned.');
+  }
+
+  return rate;
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
@@ -13,58 +30,129 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const sheetKey = resolveSheetKey(interaction.channelId);
-    if (!sheetKey) {
-      return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
-    }
-    const config = SHEET_CONFIGS[sheetKey];
-    if (!config.spreadsheetId) return interaction.editReply(`⚠️ **${config.label}** sheet is not configured.`);
+    try {
+      const sheetKey = resolveSheetKey(interaction.channelId);
 
-    const sheetTitle = await getSheetTitle(config.spreadsheetId);
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: config.spreadsheetId,
-      range: `'${sheetTitle}'!A${config.startRow}:${config.lastCol}`
-    });
+      if (!sheetKey) {
+        return interaction.editReply(
+          '⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.'
+        );
+      }
 
-    const rows = response.data.values || [];
+      const config = SHEET_CONFIGS[sheetKey];
 
-    if (sheetKey === 'captain') {
-      let totalAmount = 0, unpaidAmount = 0, paidCount = 0, unpaidCount = 0;
+      if (!config.spreadsheetId) {
+        return interaction.editReply(
+          `⚠️ **${config.label}** sheet is not configured.`
+        );
+      }
 
-      rows.forEach(row => {
-        const amt = parseFloat(row[2] ? row[2].toString().replace('$', '') : 0) || 0;
-        const status = row[3] ? row[3].trim() : '';
+      const sheetTitle = await getSheetTitle(config.spreadsheetId);
 
-        totalAmount += amt;
-        if (status === 'Paid') paidCount++;
-        else if (status === 'Not Paid') { unpaidAmount += amt; unpaidCount++; }
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: config.spreadsheetId,
+        range: `'${sheetTitle}'!A${config.startRow}:${config.lastCol}`
       });
 
-      return interaction.editReply(
-        `📊 **Captain Sheet Overview**\n--------------------\n🔢 **Total Entries:** ${rows.length}\n💵 **Total Earnings:** $${totalAmount.toFixed(2)}\n⏳ **Unpaid Amount:** $${unpaidAmount.toFixed(2)} (${unpaidCount} tasks)\n✅ **Paid Count:** ${paidCount} tasks`
+      const rows = response.data.values || [];
+      const usdToInrRate = await getUsdToInrRate();
+
+      // =========================
+      // CAPTAIN
+      // =========================
+      if (sheetKey === 'captain') {
+
+        // Column E = Link.
+        // A row is considered a real task only when the link exists.
+        const realRows = rows.filter(
+          row => row[4] && row[4].toString().trim()
+        );
+
+        let unpaidAmount = 0;
+        let unpaidCount = 0;
+
+        realRows.forEach(row => {
+          const amount =
+            parseFloat(
+              row[2]
+                ? row[2].toString().replace('$', '')
+                : 0
+            ) || 0;
+
+          const status = row[3]
+            ? row[3].toString().trim()
+            : '';
+
+          if (status === 'Not Paid') {
+            unpaidAmount += amount;
+            unpaidCount++;
+          }
+        });
+
+        const unpaidInr = unpaidAmount * usdToInrRate;
+
+        return interaction.editReply(
+          `📊 **Captain Sheet Overview**\n` +
+          `--------------------\n` +
+          `🔢 **Total Entries:** ${realRows.length}\n` +
+          `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)} (${unpaidCount} tasks)\n` +
+          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})`
+        );
+      }
+
+      // =========================
+      // CELEBI
+      // =========================
+
+      // Column A = Provider.
+      // A row is considered a real task only when Provider exists.
+      // This prevents leftover template LIVE rows from being counted.
+      const realRows = rows.filter(
+        row => row[0] && row[0].toString().trim()
       );
-    } else {
-      let totalCredits = 0, paidCredits = 0, unpaidCredits = 0, paidCount = 0, unpaidCount = 0;
 
-      const creditsIdx = config.colLetters.credits.charCodeAt(0) - 'A'.charCodeAt(0);
-      const payIdx = config.colLetters.pay.charCodeAt(0) - 'A'.charCodeAt(0);
+      const creditsIdx =
+        config.colLetters.credits.charCodeAt(0) -
+        'A'.charCodeAt(0);
 
-      rows.forEach(row => {
-        const credits = parseFloat(row[creditsIdx] || 0) || 0;
-        const status = (row[payIdx] || '').trim().toUpperCase();
+      const payIdx =
+        config.colLetters.pay.charCodeAt(0) -
+        'A'.charCodeAt(0);
 
-        totalCredits += credits;
-        if (status === 'PAID') {
-          paidCredits += credits;
-          paidCount++;
-        } else {
+      let unpaidCredits = 0;
+      let unpaidCount = 0;
+
+      realRows.forEach(row => {
+        const credits =
+          parseFloat(row[creditsIdx] || 0) || 0;
+
+        const status =
+          (row[payIdx] || '')
+            .toString()
+            .trim()
+            .toUpperCase();
+
+        if (status !== 'PAID') {
           unpaidCredits += credits;
           unpaidCount++;
         }
       });
 
+      const unpaidInr = unpaidCredits * usdToInrRate;
+
       return interaction.editReply(
-        `📊 **Celebi Sheet Overview**\n--------------------\n🔢 **Total Entries:** ${rows.length}\n💳 **Total Credits:** ${totalCredits.toFixed(1)}\n⏳ **Unpaid Credits:** ${unpaidCredits.toFixed(1)} (${unpaidCount} tasks)\n✅ **Paid Credits:** ${paidCredits.toFixed(1)} (${paidCount} tasks)`
+        `📊 **Celebi Sheet Overview**\n` +
+        `--------------------\n` +
+        `🔢 **Total Entries:** ${realRows.length}\n` +
+        `💰 **Unpaid Credits:** $${unpaidCredits.toFixed(2)} (${unpaidCount} tasks)\n` +
+        `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})`
+      );
+
+    } catch (error) {
+      console.error('Stats command error:', error);
+
+      return interaction.editReply(
+        '⚠️ Could not load the stats right now. Please try again in a moment.'
       );
     }
   }
