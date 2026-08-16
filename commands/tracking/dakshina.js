@@ -14,12 +14,21 @@ function resolveSheetKey(channelId) {
   return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
 }
 
+// Reads the live USD->INR rate from cell H1 on the Captain sheet
+// (=GOOGLEFINANCE("CURRENCY:USDINR")), used for every sheet's calc.
 async function getUsdToInrRate() {
-  const response = await fetch('https://open.er-api.com/v6/latest/USD');
-  if (!response.ok) throw new Error(`Exchange rate request failed with HTTP ${response.status}`);
-  const data = await response.json();
-  const rate = Number(data?.rates?.INR);
-  if (!Number.isFinite(rate) || rate <= 0) throw new Error('USD to INR exchange rate was not returned.');
+  const sheetTitle = await getSheetTitle(SHEET_CONFIGS.captain.spreadsheetId);
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_CONFIGS.captain.spreadsheetId,
+    range: `'${sheetTitle}'!H1`
+  });
+
+  const rate = Number(response.data.values?.[0]?.[0]);
+
+  if (!Number.isFinite(rate) || rate <= 0) {
+    throw new Error('USD to INR exchange rate cell (H1) is empty or invalid.');
+  }
+
   return rate;
 }
 
