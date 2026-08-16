@@ -96,7 +96,7 @@ module.exports = {
 
     return interaction.editReply({
         content:
-          `🙏 **Dakshina — ${config.label} Sheet**\n` +
+          `🙏 **Payment — ${config.label} Sheet**\n` +
           `--------------------\n\n` +
           `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n\n` +
           `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n\n` +
