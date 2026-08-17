@@ -50,7 +50,7 @@ async function getSheetUnpaidStats(sheetKey) {
   });
   const rows = response.data.values || [];
 
-  let realRows, unpaidAmount = 0;
+  let realRows, unpaidAmount = 0, unpaidCount = 0;
   const unpaidDates = [];
 
   if (sheetKey === 'captain') {
@@ -60,6 +60,7 @@ async function getSheetUnpaidStats(sheetKey) {
       const status = row[3] ? row[3].toString().trim() : '';
       if (status === 'Not Paid') {
         unpaidAmount += amount;
+        unpaidCount++;
         const date = parseTaskDate(row[0]); // Date
         if (date) unpaidDates.push(date);
       }
@@ -73,13 +74,14 @@ async function getSheetUnpaidStats(sheetKey) {
       const status = (row[payIdx] || '').toString().trim().toUpperCase();
       if (status !== 'PAID') {
         unpaidAmount += credits;
+        unpaidCount++;
         const date = parseTaskDate(row[1]); // Date
         if (date) unpaidDates.push(date);
       }
     });
   }
 
-  return { entryCount: realRows.length, unpaidAmount, unpaidDates };
+  return { entryCount: realRows.length, unpaidCount, unpaidAmount, unpaidDates };
 }
 
 module.exports = {
@@ -97,7 +99,7 @@ module.exports = {
       ]);
       const usdToInrRate = await getUsdToInrRate();
 
-      const totalEntries = captain.entryCount + celebi.entryCount;
+      const totalUnpaidEntries = captain.unpaidCount + celebi.unpaidCount;
       const totalUnpaid = captain.unpaidAmount + celebi.unpaidAmount;
       const totalUnpaidInr = totalUnpaid * usdToInrRate;
       const allUnpaidDates = [...captain.unpaidDates, ...celebi.unpaidDates];
@@ -110,7 +112,7 @@ module.exports = {
       return interaction.editReply(
         `📊 **All Sheets Overview**\n` +
         `--------------------\n` +
-        `🔢 **Total Entries:** ${totalEntries} (Captain: ${captain.entryCount}, Celebi: ${celebi.entryCount})\n` +
+        `🔢 **Total Unpaid Entries:** ${totalUnpaidEntries} (Captain: ${captain.unpaidCount}, Celebi: ${celebi.unpaidCount})\n` +
         `💰 **Total Unpaid:** $${totalUnpaid.toFixed(2)}\n` +
         `🇮🇳 **Total Unpaid in INR:** ₹${totalUnpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
         `📅 **Total Days:** ${fmtSpan(overallSpan)} (Captain: ${fmtSpan(captainSpan)}, Celebi: ${fmtSpan(celebiSpan)})`

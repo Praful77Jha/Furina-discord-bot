@@ -118,8 +118,8 @@ module.exports = {
         return interaction.editReply(
           `📊 **Captain Sheet Overview**\n` +
           `--------------------\n` +
-          `🔢 **Total Entries:** ${realRows.length}\n` +
-          `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)} (${unpaidCount} tasks)\n` +
+          `🔢 **Total Unpaid Entries:** ${unpaidCount}\n` +
+          `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n` +
           `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
           `📅 **Total Days:** ${spanText}`
         );
@@ -173,8 +173,8 @@ module.exports = {
       return interaction.editReply(
         `📊 **Celebi Sheet Overview**\n` +
         `--------------------\n` +
-        `🔢 **Total Entries:** ${realRows.length}\n` +
-        `💰 **Unpaid Credits:** $${unpaidCredits.toFixed(2)} (${unpaidCount} tasks)\n` +
+        `🔢 **Total Unpaid Entries:** ${unpaidCount}\n` +
+        `💰 **Unpaid Credits:** $${unpaidCredits.toFixed(2)}\n` +
         `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
         `📅 **Total Days:** ${spanText}`
       );
