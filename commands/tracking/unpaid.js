@@ -1,8 +1,62 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { sheets, SHEET_CONFIGS, getSheetTitle, getLastDataRow, logHistory } = require('../../utils/googleSheets');
+const {
+  sheets,
+  SHEET_CONFIGS,
+  getSheetTitle,
+  getLastDataRow,
+  logHistory,
+  detectTaskDetails,
+  detectCelebiTaskDetails
+} = require('../../utils/googleSheets');
 
 function resolveSheetKey(channelId) {
   return Object.keys(SHEET_CONFIGS).find(key => SHEET_CONFIGS[key].channelId === channelId);
+}
+
+// Amount column: Captain = C, Celebi = F (credits).
+function getAmountCol(sheetKey, config) {
+  return sheetKey === 'captain' ? 'C' : config.colLetters.credits;
+}
+
+// Recomputes the task rate for a row from its link, same rate used by /log.
+// Returns null if it can't be determined (blank link, unrecognized pattern, etc).
+function computeTaskRate(sheetKey, link) {
+  if (!link || !link.toString().trim()) return null;
+  try {
+    if (sheetKey === 'captain') {
+      const { amount } = detectTaskDetails(link);
+      return Number.isFinite(amount) ? amount : null;
+    } else {
+      const { credits } = detectCelebiTaskDetails(link);
+      return Number.isFinite(credits) ? credits : null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+// Given parallel old-amount / link value arrays, builds the new amount
+// column: blank cells get refilled from the task rate, everything else
+// is left exactly as-is.
+function refillBlankAmounts(sheetKey, oldAmountValues, linkValues, count) {
+  const newAmountValues = [];
+  let refilledCount = 0;
+  for (let i = 0; i < count; i++) {
+    const current = (oldAmountValues[i] && oldAmountValues[i][0] !== undefined) ? oldAmountValues[i][0] : '';
+    if (current.toString().trim() !== '') {
+      newAmountValues.push([current]);
+      continue;
+    }
+    const link = linkValues[i] ? linkValues[i][0] : '';
+    const rate = computeTaskRate(sheetKey, link);
+    if (rate !== null) {
+      newAmountValues.push([rate]);
+      refilledCount++;
+    } else {
+      newAmountValues.push(['']);
+    }
+  }
+  return { newAmountValues, refilledCount };
 }
 
 module.exports = {
@@ -31,6 +85,8 @@ module.exports = {
 
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
     const payCol = config.colLetters.pay || config.colLetters.status;
+    const amountCol = getAmountCol(sheetKey, config);
+    const linkCol = config.colLetters.link;
     const notPaidValue = sheetKey === 'captain' ? 'Not Paid' : 'NOT PAID';
 
     if (subcommand === 'list') {
@@ -62,22 +118,40 @@ module.exports = {
       if (lastRow < config.startRow) return interaction.editReply('ℹ️ No entries to update.');
 
       const count = lastRow - config.startRow + 1;
-      const range = `'${sheetTitle}'!${payCol}${config.startRow}:${payCol}${lastRow}`;
+      const payRange = `'${sheetTitle}'!${payCol}${config.startRow}:${payCol}${lastRow}`;
+      const amountRange = `'${sheetTitle}'!${amountCol}${config.startRow}:${amountCol}${lastRow}`;
+      const linkRange = `'${sheetTitle}'!${linkCol}${config.startRow}:${linkCol}${lastRow}`;
 
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
-      const oldValues = res.data.values || [];
-      while (oldValues.length < count) oldValues.push(['']);
+      const [payRes, amountRes, linkRes] = await Promise.all([
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: payRange }),
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: amountRange }),
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: linkRange })
+      ]);
+      const oldPayValues = payRes.data.values || [];
+      while (oldPayValues.length < count) oldPayValues.push(['']);
+      const oldAmountValues = amountRes.data.values || [];
+      const linkValues = linkRes.data.values || [];
 
-      const newValues = Array(count).fill([notPaidValue]);
-      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid all', range, oldValues, newValues });
+      const newPayValues = Array(count).fill([notPaidValue]);
+      const { newAmountValues, refilledCount } = refillBlankAmounts(sheetKey, oldAmountValues, linkValues, count);
 
-      await sheets.spreadsheets.values.update({
+      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid all', range: payRange, oldValues: oldPayValues, newValues: newPayValues });
+      if (refilledCount > 0) {
+        await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid all (amount refilled)', range: amountRange, oldValues: oldAmountValues, newValues: newAmountValues });
+      }
+
+      await sheets.spreadsheets.values.batchUpdate({
         spreadsheetId: config.spreadsheetId,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: newValues }
+        requestBody: {
+          valueInputOption: 'USER_ENTERED',
+          data: [
+            { range: payRange, values: newPayValues },
+            { range: amountRange, values: newAmountValues }
+          ]
+        }
       });
-      return interaction.editReply(`🔄 [${config.label}] All **${count}** rows updated back to **Not Paid**!`);
+      const suffix = refilledCount > 0 ? ` (${refilledCount} amount${refilledCount === 1 ? '' : 's'} refilled from task rate)` : '';
+      return interaction.editReply(`🔄 [${config.label}] All **${count}** rows updated back to **Not Paid**${suffix}!`);
     }
 
     if (subcommand === 'row') {
@@ -85,19 +159,38 @@ module.exports = {
       if (row < config.startRow) return interaction.editReply(`⚠️ Row number must be ${config.startRow} or higher.`);
       if (row > lastRow) return interaction.editReply(`⚠️ Row **${row}** doesn't exist (sheet only has data up to row ${lastRow}).`);
 
-      const range = `'${sheetTitle}'!${payCol}${row}`;
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
-      const oldValues = res.data.values || [];
+      const payRange = `'${sheetTitle}'!${payCol}${row}`;
+      const amountRange = `'${sheetTitle}'!${amountCol}${row}`;
+      const linkRange = `'${sheetTitle}'!${linkCol}${row}`;
 
-      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid row', range, oldValues, newValues: [[notPaidValue]] });
+      const [payRes, amountRes, linkRes] = await Promise.all([
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: payRange }),
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: amountRange }),
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: linkRange })
+      ]);
+      const oldPayValues = payRes.data.values || [];
+      const oldAmountValues = amountRes.data.values || [];
+      const linkValues = linkRes.data.values || [];
 
-      await sheets.spreadsheets.values.update({
+      const { newAmountValues, refilledCount } = refillBlankAmounts(sheetKey, oldAmountValues, linkValues, 1);
+
+      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid row', range: payRange, oldValues: oldPayValues, newValues: [[notPaidValue]] });
+      if (refilledCount > 0) {
+        await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid row (amount refilled)', range: amountRange, oldValues: oldAmountValues, newValues: newAmountValues });
+      }
+
+      await sheets.spreadsheets.values.batchUpdate({
         spreadsheetId: config.spreadsheetId,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [[notPaidValue]] }
+        requestBody: {
+          valueInputOption: 'USER_ENTERED',
+          data: [
+            { range: payRange, values: [[notPaidValue]] },
+            { range: amountRange, values: newAmountValues }
+          ]
+        }
       });
-      return interaction.editReply(`🔄 [${config.label}] Row **${row}** updated back to **Not Paid**!`);
+      const suffix = refilledCount > 0 ? ' (amount refilled from task rate)' : '';
+      return interaction.editReply(`🔄 [${config.label}] Row **${row}** updated back to **Not Paid**${suffix}!`);
     }
 
     if (subcommand === 'range') {
@@ -107,20 +200,40 @@ module.exports = {
       if (end < start) return interaction.editReply('⚠️ End row must be greater than or equal to start row.');
       if (end > lastRow) return interaction.editReply(`⚠️ Row **${end}** doesn't exist (sheet only has data up to row ${lastRow}).`);
 
-      const range = `'${sheetTitle}'!${payCol}${start}:${payCol}${end}`;
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range });
-      const oldValues = res.data.values || [];
-      const newValues = Array(end - start + 1).fill([notPaidValue]);
+      const count = end - start + 1;
+      const payRange = `'${sheetTitle}'!${payCol}${start}:${payCol}${end}`;
+      const amountRange = `'${sheetTitle}'!${amountCol}${start}:${amountCol}${end}`;
+      const linkRange = `'${sheetTitle}'!${linkCol}${start}:${linkCol}${end}`;
 
-      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid range', range, oldValues, newValues });
+      const [payRes, amountRes, linkRes] = await Promise.all([
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: payRange }),
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: amountRange }),
+        sheets.spreadsheets.values.get({ spreadsheetId: config.spreadsheetId, range: linkRange })
+      ]);
+      const oldPayValues = payRes.data.values || [];
+      const oldAmountValues = amountRes.data.values || [];
+      const linkValues = linkRes.data.values || [];
 
-      await sheets.spreadsheets.values.update({
+      const newPayValues = Array(count).fill([notPaidValue]);
+      const { newAmountValues, refilledCount } = refillBlankAmounts(sheetKey, oldAmountValues, linkValues, count);
+
+      await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid range', range: payRange, oldValues: oldPayValues, newValues: newPayValues });
+      if (refilledCount > 0) {
+        await logHistory(config.spreadsheetId, { user: interaction.user.tag, command: 'unpaid range (amount refilled)', range: amountRange, oldValues: oldAmountValues, newValues: newAmountValues });
+      }
+
+      await sheets.spreadsheets.values.batchUpdate({
         spreadsheetId: config.spreadsheetId,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: newValues }
+        requestBody: {
+          valueInputOption: 'USER_ENTERED',
+          data: [
+            { range: payRange, values: newPayValues },
+            { range: amountRange, values: newAmountValues }
+          ]
+        }
       });
-      return interaction.editReply(`🔄 [${config.label}] Rows **${start} to ${end}** updated back to **Not Paid**!`);
+      const suffix = refilledCount > 0 ? ` (${refilledCount} amount${refilledCount === 1 ? '' : 's'} refilled from task rate)` : '';
+      return interaction.editReply(`🔄 [${config.label}] Rows **${start} to ${end}** updated back to **Not Paid**${suffix}!`);
     }
   }
 };
