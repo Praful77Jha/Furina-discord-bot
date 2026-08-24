@@ -2,6 +2,8 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const { startAutomation } = require('./services/genshinAutomator');
 
 const client = new Client({
   intents: [
@@ -14,7 +16,6 @@ const client = new Client({
 client.commands = new Collection();
 const commandsArray = [];
 
-// Recursively load all commands from subfolders
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
@@ -35,9 +36,10 @@ for (const folder of commandFolders) {
   }
 }
 
-// Register Slash Commands with Discord
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}!`);
+
+  startAutomation(client);
 
   const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
   try {
@@ -52,7 +54,6 @@ client.once('ready', async () => {
   }
 });
 
-// Handle Slash Command Execution
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -71,18 +72,16 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.reply(replyOptions);
       }
     } catch (followUpError) {
-      // Interaction was already invalid/acknowledged elsewhere (e.g. two bot
-      // instances running at once) - log it but don't crash the process.
       console.error('Failed to send error reply:', followUpError.message);
     }
   }
 });
 
 client.login(process.env.DISCORD_TOKEN);
-const http = require('http');
+
 const PORT = process.env.PORT || 3000;
 
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('JACK Bot is running!');
+  res.end('Furina Bot is running 24/7 on Wispbyte!');
 }).listen(PORT, () => console.log(`Server listening on port ${PORT}`));
