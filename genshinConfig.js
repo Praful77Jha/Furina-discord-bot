@@ -1,10 +1,5 @@
-// genshinConfig.js
-// Category + channel IDs for the Genshin Impact bot
-// Used to restrict each command to its designated channel
-
 module.exports = {
   CATEGORY_ID: "1541436948915298467",
-
   CHANNELS: {
     BUILD_CHECK: "1541437029567692872",
     CHARACTER_INFO: "1541437082126516325",
@@ -12,5 +7,9 @@ module.exports = {
     BANNER_EVENTS: "1541437333428248576",
     DAILY_REMINDERS: "1541437417247219804",
     BOT_COMMANDS: "1541437492539031623",
+  },
+  UIDS: {
+    MAIN: "883893736",
+    ALT: "1810709085",
   },
 };
