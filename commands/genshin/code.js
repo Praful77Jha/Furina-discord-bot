@@ -1,11 +1,25 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const axios = require("axios");
-const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
+const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
+
+const claimedCodes = {
+  [UIDS.MAIN]: [],
+  [UIDS.ALT]: []
+};
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("codes")
-    .setDescription("Fetch active Genshin Impact redeem codes with direct redemption links."),
+    .setDescription("Fetch active Genshin redeem codes and filter unredeemed ones.")
+    .addStringOption(option =>
+      option
+        .setName("account")
+        .setDescription("Select account to check unredeemed status")
+        .addChoices(
+          { name: "NORMIE (MAIN)", value: "main" },
+          { name: "NOT_NORMIE (ALT)", value: "alt" }
+        )
+    ),
 
   async execute(interaction) {
     if (interaction.channel.parentId !== CATEGORY_ID) {
@@ -23,41 +37,34 @@ module.exports = {
 
     await interaction.deferReply();
 
+    const accountChoice = interaction.options.getString("account");
+    const targetUid = accountChoice === "alt" ? UIDS.ALT : UIDS.MAIN;
+    const userClaimed = claimedCodes[targetUid] || [];
+
     try {
-      const response = await axios.get("https://hoyo-codes.p.rapidapi.com/genshin", {
-        headers: {
-          "x-rapidapi-host": "hoyo-codes.p.rapidapi.com"
-        }
-      }).catch(() => null);
+      const response = await axios.get("https://raw.githubusercontent.com/hoyo-codes/category/main/genshin.json").catch(() => null);
+      const activeCodes = response ? response.data : [];
 
-      let codesList = [];
-      
-      if (response && response.data && response.data.codes) {
-        codesList = response.data.codes;
-      } else {
-        const fallbackRes = await axios.get("https://raw.githubusercontent.com/hoyo-codes/category/main/genshin.json").catch(() => null);
-        if (fallbackRes && fallbackRes.data) {
-          codesList = fallbackRes.data;
-        }
-      }
-
-      if (!codesList || codesList.length === 0) {
-        return interaction.editReply("No active redeem codes found right now. Check back later!");
+      if (!activeCodes || activeCodes.length === 0) {
+        return interaction.editReply("No active redeem codes found right now.");
       }
 
       const embed = new EmbedBuilder()
-        .setTitle("🎁 Active Genshin Impact Redeem Codes")
+        .setTitle(`🎁 Active Genshin Codes (${accountChoice ? accountChoice.toUpperCase() : "ALL"})`)
         .setColor("#FFD700")
-        .setDescription("Click the code links or use the official HoYoVERSE redemption site to claim your rewards.")
+        .setDescription("Unredeemed codes are highlighted below. Click the direct links to claim them.")
         .setFooter({ text: "Furina Discord Bot • Auto Code Tracker" });
 
-      codesList.slice(0, 5).forEach(c => {
+      activeCodes.slice(0, 6).forEach(c => {
         const code = c.code || c;
-        const rewards = c.rewards || c.reward || "Primogems & Rewards";
+        const reward = c.rewards || c.reward || "Primogems & Rewards";
+        const isClaimed = userClaimed.includes(code);
+        const statusStr = isClaimed ? "✅ Already Redeemed" : "🆕 **UNCLAIMED**";
         const directLink = `https://genshin.hoyoverse.com/en/gift?code=${code}`;
+
         embed.addFields({
-          name: `Code: ${code}`,
-          value: `**Rewards:** ${rewards}\n[👉 Direct Redeem Link](${directLink})`,
+          name: `Code: ${code} [${statusStr}]`,
+          value: `**Rewards:** ${reward}\n[👉 Direct Redeem Link](${directLink})`,
           inline: false
         });
       });
@@ -73,7 +80,7 @@ module.exports = {
 
     } catch (error) {
       console.error(error);
-      return interaction.editReply("Failed to fetch redeem codes. Please try again later.");
+      return interaction.editReply("Failed to fetch codes. Please try again later.");
     }
   }
 };
