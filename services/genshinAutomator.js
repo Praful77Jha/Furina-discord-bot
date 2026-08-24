@@ -14,27 +14,36 @@ async function checkNewCodes(client) {
     const channel = await client.channels.fetch(CHANNELS.REDEEM_CODES).catch(() => null);
     if (!channel) return;
 
-    const res = await axios.get("https://raw.githubusercontent.com/hoyo-codes/category/main/genshin.json").catch(() => null);
-    if (!res || !res.data) return;
+    // Old hoyo-codes/category URL was dead — this one is live and returns real codes.
+    const res = await axios.get("https://db.hashblen.com/codes").catch(() => null);
+    if (!res || !res.data || !res.data.genshin) return;
 
-    const currentCodes = res.data;
-    const newCodes = currentCodes.filter(c => !knownCodes.includes(c.code || c));
+    const currentCodes = res.data.genshin; // [{ code, description, added_at }]
+    const newCodes = currentCodes.filter(c => !knownCodes.includes(c.code));
 
     if (newCodes.length > 0 && knownCodes.length > 0) {
       newCodes.forEach(c => {
-        const code = c.code || c;
-        const reward = c.rewards || c.reward || "Primogems";
-        const embed = new EmbedBuilder()
-          .setTitle("🚨 NEW REDEEM CODE DETECTED!")
-          .setColor("#FF0000")
-          .setDescription(`**Code:** \`${code}\`\n**Rewards:** ${reward}\n\n[👉 Click Here to Auto-Claim](https://genshin.hoyoverse.com/en/gift?code=${code})`)
-          .setFooter({ text: "Furina Discord Bot Auto-Scanner" });
+        const rewards = c.description
+          ? c.description.split(";").map(r => `• ${r.trim()}`).join("\n")
+          : "• Primogems (exact reward not listed)";
 
-        channel.send({ content: "@everyone New Genshin Code dropped!", embeds: [embed] });
+        const embed = new EmbedBuilder()
+          .setTitle("🎁 New Redeem Code!")
+          .setColor("#F2C078") // warm gold, matches Genshin gift-code aesthetic better than pure red alert
+          .setThumbnail("https://static.wikia.nocookie.net/gensin-impact/images/7/7a/Item_Primogem.png")
+          .addFields(
+            { name: "Code", value: `\`\`\`${c.code}\`\`\``, inline: false }, // code block = easy tap-to-copy, no backtick clutter
+            { name: "Rewards", value: rewards, inline: false }
+          )
+          .setURL(`https://genshin.hoyoverse.com/en/gift?code=${c.code}`)
+          .setFooter({ text: "Tap the title to redeem • Furina Auto-Scanner" })
+          .setTimestamp();
+
+        channel.send({ content: "🔔 New code just dropped!", embeds: [embed] });
       });
     }
 
-    knownCodes = currentCodes.map(c => c.code || c);
+    knownCodes = currentCodes.map(c => c.code);
   } catch (err) {
     console.error("Auto Code Scanner Error:", err);
   }
@@ -46,13 +55,15 @@ async function checkDailyReset(client) {
     if (!channel) return;
 
     const embed = new EmbedBuilder()
-      .setTitle("🔔 Daily Reset & Domain Rotation Notice")
-      .setColor("#3498DB")
-      .setDescription("Daily server reset is complete! Remember to complete your daily commissions and spend your Original Resin.")
+      .setTitle("🌅 Daily Reset")
+      .setColor("#4FC3F7") // lighter Hydro-ish blue, less "generic Discord blurple"
+      .setThumbnail("https://static.wikia.nocookie.net/gensin-impact/images/e/e2/Item_Original_Resin.png")
+      .setDescription("Server reset is done — here's today's checklist:")
       .addFields(
-        { name: "Daily Checklist", value: "• Daily Commissions (4/4)\n• Expedition Rewards\n• Battle Pass Dailies\n• Serenitea Pot Realm Currency" }
+        { name: "✅ To Do", value: "• Daily Commissions (4/4)\n• Expedition Rewards\n• Battle Pass Dailies\n• Serenitea Pot Currency", inline: false }
       )
-      .setFooter({ text: "Furina Bot • Daily Scheduler" });
+      .setFooter({ text: "Furina Bot • Daily Scheduler" })
+      .setTimestamp();
 
     channel.send({ embeds: [embed] });
   } catch (err) {
