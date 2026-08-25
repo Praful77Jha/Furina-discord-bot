@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { startAutomation } = require('./services/genshinAutomator');
+const { CATEGORY_ID: GENSHIN_CATEGORY_ID } = require('./genshinConfig');
 
 const client = new Client({
   intents: [
@@ -28,6 +29,9 @@ for (const folder of commandFolders) {
     const command = require(filePath);
 
     if ('data' in command && 'execute' in command) {
+      // Tag by source folder so we know which commands are Genshin-restricted
+      // vs. Sheet commands, without hardcoding a name list here.
+      command._isGenshin = folder.toLowerCase() === 'genshin';
       client.commands.set(command.data.name, command);
       commandsArray.push(command.data.toJSON());
     } else {
@@ -55,10 +59,36 @@ client.once('ready', async () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  // Central handler for the /build character-select menu — works regardless
+  // of how long ago the message was sent, unlike a per-command collector.
+  if (interaction.isStringSelectMenu() && interaction.customId === 'select_build_character') {
+    const buildCommand = client.commands.get('build');
+    try {
+      await buildCommand.handleCharacterSelect(interaction);
+    } catch (error) {
+      console.error('Select menu handler error:', error);
+    }
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
+
+  // Sheet commands (Furina) previously had no category check at all, so they were
+  // runnable (and visible) inside the Genshin channels too. This blocks execution
+  // for any non-Genshin command inside the Genshin category. Note: Discord's slash
+  // command picker will still list them there — that part isn't fixable per-channel
+  // without giving the Sheet commands their own restricted guild/permission scope,
+  // only per-guild. This stops them from actually running there.
+  const inGenshinCategory = interaction.channel?.parentId === GENSHIN_CATEGORY_ID;
+  if (inGenshinCategory && !command._isGenshin) {
+    return interaction.reply({
+      content: "This command isn't available inside the Genshin category.",
+      ephemeral: true
+    });
+  }
 
   try {
     await command.execute(interaction);

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const axios = require("axios");
 const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
+const { findCharacterByName } = require("../../enkaCharacterData");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,48 +15,48 @@ module.exports = {
 
   async execute(interaction) {
     if (interaction.channel.parentId !== CATEGORY_ID) {
-      return interaction.reply({ 
-        content: "This command can only be used inside the Genshin category.", 
-        ephemeral: true 
+      return interaction.reply({
+        content: "This command can only be used inside the Genshin category.",
+        ephemeral: true
       });
     }
     if (interaction.channelId !== CHANNELS.CHARACTER_INFO) {
-      return interaction.reply({ 
-        content: `Please use this command in <#${CHANNELS.CHARACTER_INFO}>.`, 
-        ephemeral: true 
+      return interaction.reply({
+        content: `Please use this command in <#${CHANNELS.CHARACTER_INFO}>.`,
+        ephemeral: true
       });
     }
 
     await interaction.deferReply();
 
-    const charName = interaction.options.getString("name").toLowerCase().trim().replace(/\s+/g, "-");
+    const query = interaction.options.getString("name");
 
     try {
-      const response = await axios.get(`https://gsi.fly.dev/v2/characters/${charName}`);
-      const char = response.data.result || response.data;
+      // gsi.fly.dev is dead (fails even on real, current characters) — this pulls
+      // straight from Enka's own character database instead, which is kept current.
+      const char = await findCharacterByName(query);
+
+      if (!char) {
+        return interaction.editReply(`Could not find character \`${query}\`. Check the spelling and try again.`);
+      }
 
       const embed = new EmbedBuilder()
-        .setTitle(char.name || charName.toUpperCase())
+        .setTitle(char.name)
         .setColor("#0099FF")
-        .setDescription(char.description || "No description available.")
         .addFields(
-          { name: "Rarity", value: "⭐".repeat(char.rarity || 5), inline: true },
-          { name: "Vision", value: char.vision || char.element || "N/A", inline: true },
-          { name: "Weapon", value: char.weapon || "N/A", inline: true },
-          { name: "Nation", value: char.nation || "N/A", inline: true },
-          { name: "Affiliation", value: char.affiliation || "N/A", inline: true },
-          { name: "Constellation", value: char.constellation || "N/A", inline: true }
+          { name: "Rarity", value: char.rarity ? "⭐".repeat(char.rarity) : "N/A", inline: true },
+          { name: "Element", value: char.element || "N/A", inline: true },
+          { name: "Weapon Type", value: char.weaponType || "N/A", inline: true }
         )
-        .setFooter({ text: "Furina Discord Bot • Genshin API" });
+        .setFooter({ text: "Furina Discord Bot • Enka Network Data" });
 
-      if (char.icon) {
-        embed.setThumbnail(char.icon);
-      }
+      if (char.icon) embed.setThumbnail(char.icon);
 
       await interaction.editReply({ embeds: [embed] });
 
     } catch (error) {
-      return interaction.editReply(`Could not find character \`${charName}\`. Check the spelling and try again.`);
+      console.error(error);
+      return interaction.editReply(`Could not find character \`${query}\`. Check the spelling and try again.`);
     }
   }
 };
