@@ -1,5 +1,7 @@
 # Furina Discord Bot
 
+> Personal bot for my own Discord server — not meant for public/general use. Genshin config, sheet IDs, and payment info below are specific to my setup.
+
 A multi-purpose Discord bot built with **discord.js v14** that combines Genshin Impact utilities with a Google Sheets-backed task/payment tracker. Runs as a single Node process with a lightweight HTTP server for uptime pings (currently hosted on Wispbyte).
 
 ## Features
@@ -52,41 +54,32 @@ Commands are auto-loaded from `commands/<folder>/*.js` — anything folder isn't
 └── assets/                     # Bot avatar image, payment QR codes
 ```
 
-## Setup
+## Local Setup (for me, redeploying/reinstalling)
 
-1. **Clone and install**
+1. **Install deps**
    ```bash
-   git clone https://github.com/Praful77Jha/Furina-discord-bot.git
-   cd Furina-discord-bot
    npm install
    npm install axios   # not yet in package.json — required at runtime
    ```
 
-2. **Create a `.env` file** with:
+2. **`.env` file** needs:
    ```
-   DISCORD_TOKEN=your-bot-token
+   DISCORD_TOKEN=...
    PORT=3000
-
-   # Google Sheets auth — either paste the full service account JSON...
-   GOOGLE_CREDENTIALS_JSON={"type":"service_account", ...}
-   # ...or drop a credentials.json file in the project root instead.
-
-   # Captain sheet
-   SPREADSHEET_ID=your-captain-sheet-id
-   CAPTAIN_CHANNEL_ID=discord-channel-id
-
-   # Celebi sheet
-   CELEBI_SPREADSHEET_ID=your-celebi-sheet-id
-   CELEBI_CHANNEL_ID=discord-channel-id
+   GOOGLE_CREDENTIALS_JSON={"type":"service_account", ...}   # or drop credentials.json in root
+   SPREADSHEET_ID=...            # Captain sheet
+   CAPTAIN_CHANNEL_ID=...
+   CELEBI_SPREADSHEET_ID=...
+   CELEBI_CHANNEL_ID=...
    ```
 
-3. **Update `genshinConfig.js`** with your own category/channel IDs and Genshin UIDs (the checked-in values are the maintainer's own server/account IDs).
+3. `genshinConfig.js` already has my server's category/channel IDs and Genshin UIDs baked in — only touch this if the server structure changes.
 
-4. **Run it**
+4. **Run**
    ```bash
    npm start
    ```
-   Slash commands are registered automatically on login.
+   Slash commands re-register automatically on login.
 
 ## Notes / Known Limitations
 
