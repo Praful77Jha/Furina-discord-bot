@@ -23,9 +23,19 @@ async function loadCharacterData() {
   const byId = {};
   for (const [avatarId, info] of Object.entries(chars)) {
     const rarityMap = { QUALITY_ORANGE: 5, QUALITY_PURPLE: 4 };
+
+    // SideIconName looks like "UI_AvatarIcon_Side_Ayaka" — strip the "_Side"
+    // to get the base name, then swap prefixes for the other art variants
+    // Enka hosts under the same /ui/ path. This is the same convention
+    // enka-network-api / enkanetwork.js wrappers use.
+    const baseName = (info.SideIconName || "").replace("_Side", "").replace("UI_AvatarIcon_", "");
+    const faceIcon = baseName ? `https://enka.network/ui/UI_AvatarIcon_${baseName}.png` : null;
+    const splashArt = baseName ? `https://enka.network/ui/UI_Gacha_AvatarImg_${baseName}.png` : null;
+
     byId[avatarId] = {
       name: namesEn[info.NameTextMapHash] || `Character ${avatarId}`,
-      icon: `https://enka.network/ui/${info.SideIconName?.replace("_Side", "") || info.SideIconName}.png`,
+      icon: faceIcon,
+      splashArt,
       element: info.Element || "Unknown",
       weaponType: (info.WeaponType || "").replace("WEAPON_", "").replace(/_/g, " "),
       rarity: rarityMap[info.QualityType] || null
