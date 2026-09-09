@@ -4,10 +4,25 @@ const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
 const { getCharacterInfo } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
 
+const HEADERS = {
+  "User-Agent": "FurinaDiscordBot/1.0 (Genshin Helper)",
+  "Accept": "application/json"
+};
+
 async function fetchEnkaCard(uid, avatarId) {
   const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
-  const response = await axios.get(url, { responseType: "arraybuffer", timeout: 15000 });
+  const response = await axios.get(url, {
+    responseType: "arraybuffer",
+    timeout: 15000,
+    headers: { "User-Agent": "FurinaDiscordBot/1.0", "Accept": "image/png" }
+  });
   return Buffer.from(response.data);
+}
+
+async function fetchEnkaData(uid) {
+  const url = `https://enka.network/api/uid/${uid}`;
+  const response = await axios.get(url, { timeout: 15000, headers: HEADERS });
+  return response.data;
 }
 
 module.exports = {
@@ -41,8 +56,7 @@ module.exports = {
     const targetUid = customUid || (accountChoice === "alt" ? UIDS.ALT : UIDS.MAIN);
 
     try {
-      const response = await axios.get(`https://enka.network/api/uid/${targetUid}`);
-      const data = response.data;
+      const data = await fetchEnkaData(targetUid);
 
       if (!data.avatarInfoList || data.avatarInfoList.length === 0) {
         return interaction.editReply(`No showcased characters found for UID \`${targetUid}\`.`);

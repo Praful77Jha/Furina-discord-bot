@@ -4,6 +4,8 @@ const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
 const { getElementStyle } = require("../../elementStyle");
 const { createCanvas, loadImageSafe, drawImageCover, drawReadabilityGradient, roundRect } = require("../../canvasRenderer");
 
+const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
+
 const BANNER_W = 380;
 const BANNER_H = 420;
 const GAP = 16;
@@ -90,7 +92,7 @@ module.exports = {
     await interaction.deferReply();
 
     try {
-      const response = await axios.get("https://api.ennead.cc/mihoyo/genshin/calendar").catch(() => null);
+      const response = await axios.get("https://api.ennead.cc/mihoyo/genshin/calendar", { headers: HEADERS }).catch(() => null);
       const banners = response?.data?.banners || [];
 
       if (banners.length === 0) {

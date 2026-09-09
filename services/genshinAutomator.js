@@ -4,6 +4,8 @@ const { CHANNELS, UIDS } = require("../genshinConfig");
 const codeCommand = require("../commands/genshin/code");
 const reminderCommand = require("../commands/genshin/reminders");
 
+const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
+
 let knownCodes = [];
 
 const RESET_HOUR_UTC = 20;
@@ -33,7 +35,7 @@ async function checkNewCodes(client) {
     const channel = await client.channels.fetch(CHANNELS.REDEEM_CODES).catch(() => null);
     if (!channel) return;
 
-    const res = await axios.get("https://api.ennead.cc/mihoyo/genshin/codes").catch(() => null);
+    const res = await axios.get("https://api.ennead.cc/mihoyo/genshin/codes", { headers: HEADERS }).catch(() => null);
     const currentCodes = res?.data?.active || [];
     if (currentCodes.length === 0) return;
 
@@ -92,7 +94,7 @@ async function postCurrentBanners(client) {
     const channel = await client.channels.fetch(CHANNELS.BANNER_EVENTS).catch(() => null);
     if (!channel) return;
 
-    const response = await axios.get("https://api.ennead.cc/mihoyo/genshin/calendar").catch(() => null);
+    const response = await axios.get("https://api.ennead.cc/mihoyo/genshin/calendar", { headers: HEADERS }).catch(() => null);
     const banners = response?.data?.banners || [];
     if (banners.length === 0) return;
 

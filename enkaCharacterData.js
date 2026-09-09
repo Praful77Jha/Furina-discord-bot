@@ -4,6 +4,8 @@ const CHAR_URL = "https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/
 const LOC_URL = "https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/loc.json";
 const REFRESH_MS = 6 * 60 * 60 * 1000;
 
+const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
+
 let cache = null;
 
 const NEW_CHARACTERS = {
@@ -21,8 +23,8 @@ async function loadCharacterData() {
   if (cache && Date.now() - cache.fetchedAt < REFRESH_MS) return cache.byId;
 
   const [charsRes, locRes] = await Promise.all([
-    axios.get(CHAR_URL),
-    axios.get(LOC_URL)
+    axios.get(CHAR_URL, { headers: HEADERS }),
+    axios.get(LOC_URL, { headers: HEADERS })
   ]);
 
   const chars = charsRes.data;
