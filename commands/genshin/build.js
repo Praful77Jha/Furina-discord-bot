@@ -22,9 +22,6 @@ module.exports = {
     .setName("build")
     .setDescription("Fetch Genshin character build from Enka.Network.")
     .addStringOption(option =>
-      option.setName("character").setDescription("Character name (optional — leave blank for dropdown)")
-    )
-    .addStringOption(option =>
       option.setName("account").setDescription("Select account preset").addChoices(
         { name: "NORMIE (MAIN)", value: "main" },
         { name: "NOT_NORMIE (ALT)", value: "alt" }
@@ -44,7 +41,6 @@ module.exports = {
 
     const accountChoice = interaction.options.getString("account");
     const customUid = interaction.options.getString("uid");
-    const characterName = interaction.options.getString("character");
     const targetUid = customUid || (accountChoice === "alt" ? UIDS.ALT : UIDS.MAIN);
 
     try {
@@ -57,43 +53,6 @@ module.exports = {
 
       const avatarList = data.avatarInfoList;
       showcaseCache.set(targetUid, { avatarList, fetchedAt: Date.now() });
-
-      if (characterName) {
-        const searchName = characterName.toLowerCase().trim();
-        let matchedAvatar = null;
-
-        for (const avatar of avatarList) {
-          const info = await getCharacterInfo(avatar.avatarId);
-          if (info && info.name && info.name.toLowerCase().includes(searchName)) {
-            matchedAvatar = avatar;
-            break;
-          }
-        }
-
-        if (!matchedAvatar) {
-          const charList = await Promise.all(avatarList.map(async (a) => {
-            const info = await getCharacterInfo(a.avatarId);
-            return info?.name || "Unknown";
-          }));
-          return interaction.editReply(`**${characterName}** not found in showcase.\nAvailable: ${charList.join(", ")}`);
-        }
-
-        try {
-          const buffer = await fetchEnkaCard(targetUid, matchedAvatar.avatarId);
-          const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
-          await interaction.editReply({ files: [attachment] });
-        } catch (cardErr) {
-          const charInfo = await getCharacterInfo(matchedAvatar.avatarId);
-          const style = getElementStyle(charInfo?.element);
-          const embed = new EmbedBuilder()
-            .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
-            .setColor(style.color)
-            .setDescription(`Enka card unavailable — try again later.\nUID: \`${targetUid}\``)
-            .setFooter({ text: "Furina Discord Bot • Enka Network" });
-          await interaction.editReply({ embeds: [embed] });
-        }
-        return;
-      }
 
       const selectOptions = await Promise.all(avatarList.map(async (avatar, index) => {
         const info = await getCharacterInfo(avatar.avatarId);
