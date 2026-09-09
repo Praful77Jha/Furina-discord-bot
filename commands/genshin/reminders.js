@@ -65,7 +65,15 @@ async function renderReminderCard() {
 
   ctx.font = "15px sans-serif";
   ctx.fillStyle = "#7A8AA0";
-  ctx.fillText("Daily reset: 04:00 AM server time", 30, 78);
+  const resetHour = 4;
+  const now = new Date();
+  const nextReset = new Date(now);
+  nextReset.setUTCHours(resetHour, 0, 0, 0);
+  if (nextReset <= now) nextReset.setUTCDate(nextReset.getUTCDate() + 1);
+  const diff = nextReset.getTime() - now.getTime();
+  const rHours = Math.floor(diff / (1000 * 60 * 60));
+  const rMins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  ctx.fillText(`Daily reset in ${rHours}h ${rMins}m  •  04:00 AM server time`, 30, 78);
 
   let y = 120;
 
