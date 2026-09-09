@@ -84,9 +84,10 @@ async function installBinaryFallback() {
     timeout: 30000
   });
   const assets = api.data?.assets || [];
+  const banned = ["desktop", ".deb", ".rpm", ".dmg", ".exe", ".msi", ".zip", ".tar.", ".tgz"];
   const match = assets.find(a => {
     const n = String(a.name || "").toLowerCase();
-    return n.includes("linux") && archKeys.some(k => n.includes(k));
+    return n.includes("linux") && archKeys.some(k => n.includes(k)) && !banned.some(b => n.includes(b));
   });
   if (!match) {
     throw new Error("no linux binary asset (saw: " + assets.map(a => a.name).join(",").slice(0, 300) + ")");
@@ -110,25 +111,108 @@ async function installBinaryFallback() {
   } catch {}
 }
 
+function isMusl() {
+  try {
+    if (fs.existsSync("/etc/alpine-release")) return true;
+    return fs.readdirSync("/lib").some(f => f.includes("ld-musl"));
+  } catch {
+    return false;
+  }
+}
+
+function verifyBin(bin) {
+  return new Promise((resolve) => {
+    execFile(bin, ["--version"], { timeout: 30000 }, (err, stdout) => {
+      resolve(!err && String(stdout || "").trim().length > 0);
+    });
+  });
+}
+
+function findBinIn(pkgDir) {
+  const found = [];
+  (function walk(dir, depth) {
+    if (depth > 4) return;
+    let entries = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        walk(p, depth + 1);
+      } else if (/^opencode(\.exe)?$/i.test(e.name)) {
+        found.push(p);
+      }
+    }
+  })(pkgDir, 0);
+  return found;
+}
+
+async function tryNpmVariant(pkg) {
+  const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+  await runCmd(npm, ["install", "--prefix", TOOLS_DIR, pkg], 300000);
+  for (const bin of findBinIn(path.join(TOOLS_DIR, "node_modules", pkg))) {
+    try {
+      fs.chmodSync(bin, 0o755);
+    } catch {}
+    if (await verifyBin(bin)) return bin;
+  }
+  return null;
+}
+
 let installing = null;
 function ensureCli() {
-  if (resolveCli()) return Promise.resolve(false);
   if (installing) return installing;
   installing = (async () => {
     try {
       fs.mkdirSync(TOOLS_DIR, { recursive: true });
       fs.mkdirSync(WORK_DIR, { recursive: true });
     } catch {}
-    const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-    try {
-      await runCmd(npm, ["install", "--prefix", TOOLS_DIR, "opencode-ai"], 300000);
-    } catch (npmErr) {
-      console.error("npm CLI install failed:", npmErr.message);
-      console.error("Trying standalone binary fallback...");
-      await installBinaryFallback();
+    // Drop any stale/broken binary (e.g. the .deb downloaded earlier).
+    const existing = resolveCli();
+    if (existing && !(await verifyBin(existing))) {
+      console.error("Removing broken CLI binary:", existing);
+      try {
+        fs.unlinkSync(existing);
+      } catch {}
     }
-    if (!resolveCli()) throw new Error("CLI install produced no binary (see logs above)");
-    return true;
+    if (resolveCli()) return true;
+    // The generic wrapper can't detect this container's libc/CPU, so try
+    // the platform variants in order and keep the first one that runs.
+    const musl = isMusl();
+    console.error("musl libc detected:", musl);
+    const archBit = os.arch() === "arm64" ? "arm64" : "x64";
+    const suffixes = musl
+      ? ["-musl", "-baseline-musl", "", "-baseline"]
+      : ["", "-baseline", "-musl", "-baseline-musl"];
+    for (const sfx of suffixes) {
+      const pkg = `opencode-linux-${archBit}${sfx}`;
+      try {
+        console.error("Trying CLI package:", pkg);
+        const bin = await tryNpmVariant(pkg);
+        if (bin) {
+          const dest = path.join(TOOLS_DIR, "opencode");
+          try {
+            fs.copyFileSync(bin, dest);
+            fs.chmodSync(dest, 0o755);
+          } catch {}
+          console.error("CLI ready:", dest);
+          return true;
+        }
+      } catch (e) {
+        console.error("Package", pkg, "failed:", String(e.message).slice(0, 300));
+      }
+    }
+    console.error("npm variants exhausted, trying release-asset fallback...");
+    await installBinaryFallback();
+    const finalBin = resolveCli();
+    if (finalBin && await verifyBin(finalBin)) return true;
+    try {
+      if (finalBin) fs.unlinkSync(finalBin);
+    } catch {}
+    throw new Error("CLI install produced no working binary (see logs above)");
   })();
   installing.catch(() => { installing = null; });
   return installing;
