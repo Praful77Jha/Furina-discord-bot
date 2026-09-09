@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { execFile } = require("child_process");
+const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -10,10 +11,22 @@ const os = require("os");
 const MODEL = "opencode/mimo-v2.5-free";
 const TOOLS_DIR = path.join(os.homedir(), ".ai-cli");
 const WORK_DIR = path.join(os.homedir(), ".aiwork");
-const CLI_BIN = path.join(
-  TOOLS_DIR, "node_modules", ".bin",
-  process.platform === "win32" ? "opencode.cmd" : "opencode"
-);
+function candidateBins() {
+  const exe = process.platform === "win32" ? "opencode.cmd" : "opencode";
+  return [
+    path.join(TOOLS_DIR, "node_modules", ".bin", exe),
+    path.join(TOOLS_DIR, "opencode" + (process.platform === "win32" ? ".exe" : ""))
+  ];
+}
+
+function resolveCli() {
+  for (const p of candidateBins()) {
+    try {
+      if (fs.existsSync(p)) return p;
+    } catch {}
+  }
+  return null;
+}
 const RUN_TIMEOUT_MS = 240000;
 
 // Owner-only for now. Later: add user IDs to ALLOWED_USER_IDS
@@ -43,32 +56,81 @@ function stripAnsi(text) {
 }
 
 function cliExists() {
-  try {
-    return fs.existsSync(CLI_BIN);
-  } catch {
-    return false;
+  return !!resolveCli();
+}
+
+function runCmd(cmd, args, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, { timeout: timeoutMs, maxBuffer: 4 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) {
+        const tail = String(stderr || stdout || err.message).slice(-1000);
+        return reject(new Error(cmd + " failed: " + tail));
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+// npm failed on the host before with no detail - fallback is the standalone
+// binary from GitHub releases (no root, no build step, just download + chmod).
+async function installBinaryFallback() {
+  if (process.platform !== "linux") throw new Error("binary fallback supports linux only, platform=" + process.platform);
+  const arch = os.arch();
+  const archKeys = arch === "x64" ? ["x64", "x86_64", "amd64"]
+    : arch === "arm64" ? ["arm64", "aarch64"] : null;
+  if (!archKeys) throw new Error("unsupported arch " + arch);
+  const api = await axios.get("https://api.github.com/repos/anomalyco/opencode/releases/latest", {
+    headers: { "User-Agent": "FurinaDiscordBot/1.0", "Accept": "application/vnd.github+json" },
+    timeout: 30000
+  });
+  const assets = api.data?.assets || [];
+  const match = assets.find(a => {
+    const n = String(a.name || "").toLowerCase();
+    return n.includes("linux") && archKeys.some(k => n.includes(k));
+  });
+  if (!match) {
+    throw new Error("no linux binary asset (saw: " + assets.map(a => a.name).join(",").slice(0, 300) + ")");
   }
+  console.log("Downloading CLI asset:", match.name);
+  const out = path.join(TOOLS_DIR, "opencode");
+  const dl = await axios.get(match.browser_download_url, {
+    responseType: "stream",
+    timeout: 180000,
+    headers: { "User-Agent": "FurinaDiscordBot/1.0" }
+  });
+  await new Promise((res, rej) => {
+    const writer = fs.createWriteStream(out, { mode: 0o755 });
+    dl.data.pipe(writer);
+    writer.on("finish", res);
+    writer.on("error", rej);
+    dl.data.on("error", rej);
+  });
+  try {
+    fs.chmodSync(out, 0o755);
+  } catch {}
 }
 
 let installing = null;
 function ensureCli() {
-  if (cliExists()) return Promise.resolve(false);
+  if (resolveCli()) return Promise.resolve(false);
   if (installing) return installing;
-  installing = new Promise((resolve, reject) => {
+  installing = (async () => {
     try {
       fs.mkdirSync(TOOLS_DIR, { recursive: true });
       fs.mkdirSync(WORK_DIR, { recursive: true });
     } catch {}
     const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-    execFile(npm, ["install", "--prefix", TOOLS_DIR, "opencode-ai"], { timeout: 300000 }, (err) => {
-      installing = null;
-      if (err || !cliExists()) {
-        reject(err || new Error("CLI install produced no binary"));
-      } else {
-        resolve(true);
-      }
-    });
-  });
+    try {
+      await runCmd(npm, ["install", "--prefix", TOOLS_DIR, "opencode-ai"], 300000);
+    } catch (npmErr) {
+      console.error("npm CLI install failed:", npmErr.message);
+      console.error("Trying standalone binary fallback...");
+      await installBinaryFallback();
+    }
+    if (!resolveCli()) throw new Error("CLI install produced no binary (see logs above)");
+    return true;
+  })();
+  installing.catch(() => { installing = null; });
   return installing;
 }
 
@@ -83,7 +145,9 @@ function runCli(prompt, apiKey) {
     // Prompt passed as argv (no shell). Leading dashes stripped so user
     // input can never be parsed as CLI flags.
     const safePrompt = String(prompt).replace(/^-+/, "").slice(0, 1500);
-    execFile(CLI_BIN, ["run", "-m", MODEL, safePrompt], {
+    const bin = resolveCli();
+    if (!bin) throw new Error("CLI binary missing after install");
+    execFile(bin, ["run", "-m", MODEL, safePrompt], {
       cwd: WORK_DIR,
       timeout: RUN_TIMEOUT_MS,
       maxBuffer: 4 * 1024 * 1024,
@@ -118,17 +182,13 @@ module.exports = {
     const prompt = interaction.options.getString("prompt");
 
     try {
-      const justInstalled = await ensureCli().catch((err) => {
-        console.error("CLI install failed:", err.message);
-        return "INSTALL_FAILED";
-      });
-      if (justInstalled === "INSTALL_FAILED" || !cliExists()) {
-        return interaction.editReply("AI engine install failed - check host logs.");
-      }
-      if (justInstalled === true) {
-        await interaction.editReply("AI engine installed. Running your prompt now...");
-      }
+      await ensureCli();
+    } catch (err) {
+      console.error("CLI install failed:", err.message);
+      return interaction.editReply("AI engine install failed - check host logs.");
+    }
 
+    try {
       const text = await runCli(prompt, apiKey);
       const parts = chunk(text || "No response.");
       await interaction.editReply(parts[0]);
