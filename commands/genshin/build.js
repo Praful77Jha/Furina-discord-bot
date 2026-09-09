@@ -1,45 +1,40 @@
 const { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
-const { getCharacterInfo } = require("../../enkaCharacterData");
+const { getCharacterInfo, findCharacterByName } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
 
 const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
-// Akasha sits behind Cloudflare and can 403 requests from datacenter IPs / bare headers.
-// akasha-py (a working wrapper) just sends a plain UA string, so mimic that rather than
-// our custom bot UA - and add Accept/Referer since Cloudflare sometimes checks those too.
-const AKASHA_HEADERS = {
-  "User-Agent": "akasha-py",
-  "Accept": "application/json",
-  "Referer": "https://akasha.cv/"
-};
+// Akasha's API sits behind Cloudflare and 403s every server-side request,
+// so the user's Akasha history (20 chars, from their profile) is kept as a
+// static list instead of being fetched live.
+// Live status still comes from Enka, so newly showcased characters work
+// as long as their name is added here.
+const AKASHA_HISTORY = [
+  "Skirk", "Yelan", "Arlecchino", "Furina", "Hu Tao", "Kachina",
+  "Flins", "Mualani", "Kamisato Ayato", "Xiao", "Columbina",
+  "Wanderer", "Xiangling", "Kamisato Ayaka", "Faruzan",
+  "Kaedehara Kazuha", "Baizhu", "Citlali", "Xingqiu", "Bennett"
+];
 
 // Cache of the merged Akasha+Enka character list per UID, so autocomplete
 // doesn't have to hit both APIs on every keystroke.
 const SHOWCASE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min - how long before a background refresh kicks off
 const showcaseCache = new Map(); // uid -> { data: [{ name, avatarId, isLive }], fetchedAt, refreshing }
 
-// Full character history from Akasha.cv (everything ever calculated, not just live showcase)
+// Static Akasha history with avatarIds resolved from local character data.
+// IDs are Numbers so they match Enka's avatarId type in the live-set check.
 async function getAkashaCharacters(uid) {
-  try {
-    const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
-      headers: AKASHA_HEADERS,
-      timeout: 8000
-    });
-    const raw = response.data.data || response.data;
-
-    // Dedupe by characterId - Akasha can have multiple calc entries per character
-    const byId = new Map();
-    for (const entry of raw) {
-      if (!byId.has(entry.characterId)) {
-        byId.set(entry.characterId, { name: entry.name, avatarId: entry.characterId });
-      }
+  const out = [];
+  for (const name of AKASHA_HISTORY) {
+    try {
+      const found = await findCharacterByName(name);
+      out.push({ name: found ? found.name : name, avatarId: found ? Number(found.avatarId) : null });
+    } catch (err) {
+      out.push({ name, avatarId: null });
     }
-    return [...byId.values()];
-  } catch (err) {
-    console.error("Akasha fetch error:", err.response?.status, err.message);
-    return null; // null = "failed", distinct from [] = "fetched but empty"
   }
+  return out;
 }
 
 // Just the avatarIds currently in the live in-game showcase
@@ -60,9 +55,22 @@ async function fetchAndMerge(uid) {
     getLiveShowcaseIds(uid)
   ]);
 
+  // Match by name (case-insensitive) so local-data ID quirks for new
+  // characters can never mark a live character as not showcased.
+  const liveByName = new Map();
+  for (const a of live.avatars) {
+    const info = await getCharacterInfo(a.avatarId);
+    if (info?.name) liveByName.set(info.name.toLowerCase(), a.avatarId);
+  }
+
   if (akashaChars) {
-    // Akasha worked - full history, tagged with live status
-    return akashaChars.map(c => ({ name: c.name, avatarId: c.avatarId, isLive: live.ids.has(c.avatarId) }));
+    // Static history - full 20, tagged with live status
+    return akashaChars.map(c => {
+      const liveId = liveByName.get(c.name.toLowerCase());
+      return liveId !== undefined
+        ? { name: c.name, avatarId: liveId, isLive: true }
+        : { name: c.name, avatarId: c.avatarId, isLive: false };
+    });
   }
 
   // Akasha failed (e.g. 403) - degrade to just the live Enka showcase so autocomplete
