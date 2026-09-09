@@ -57,12 +57,15 @@ client.once('ready', async () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  // /build character-select menu
-  if (interaction.isStringSelectMenu() && interaction.customId === 'select_build_character') {
+  // /build autocomplete
+  if (interaction.isAutocomplete()) {
     try {
-      await client.commands.get('build').handleCharacterSelect(interaction);
+      const command = client.commands.get(interaction.commandName);
+      if (command && command.autocomplete) {
+        await command.autocomplete(interaction);
+      }
     } catch (error) {
-      console.error('Select menu handler error:', error);
+      console.error('Autocomplete error:', error);
     }
     return;
   }
