@@ -6,6 +6,34 @@ const { getElementStyle } = require("../../elementStyle");
 
 const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
 
+const ALL_CHARACTERS = [
+  "Albedo", "Alhaitham", "Amber", "Arataki Itto", "Arlecchino",
+  "Baizhu", "Barbara", "Beidou", "Bennett",
+  "Candace", "Charlotte", "Chiori", "Chongyun", "Clorinde", "Collei", "Columbina", "Cyno",
+  "Dehya", "Diluc", "Diona", "Dori",
+  "Eula",
+  "Faruzan", "Fischl", "Freminet",
+  "Gaming", "Ganyu", "Gorou",
+  "Hu Tao",
+  "Jean",
+  "Kaedehara Kazuha", "Kamisato Ayaka", "Kamisato Ayato", "Kaveh",
+  "Keqing", "Kirara", "Klee", "Kujou Sara", "Kuki Shinobu",
+  "Layla", "Lisa", "Lynette", "Lyney",
+  "Mavuika", "Mika", "Mona", "Mualani",
+  "Nahida", "Navia", "Neuvillette", "Nilou", "Ningguang", "Noelle",
+  "Qiqi",
+  "Raiden Shogun", "Razor", "Rosaria",
+  "Sangonomiya Kokomi", "Sayu", "Sethos", "Shenhe", "Shikanoin Heizou",
+  "Sigewinne", "Sucrose",
+  "Tartaglia", "Thoma", "Tighnari",
+  "Traveler (Anemo)", "Traveler (Geo)", "Traveler (Electro)", "Traveler (Dendro)", "Traveler (Hydro)",
+  "Venti",
+  "Wanderer", "Wriothesley",
+  "Xiangling", "Xiao", "Xingqiu", "Xinyan",
+  "Yae Miko", "Yanfei", "Yaoyao", "Yelan", "Yoimiya", "Yun Jin",
+  "Zhongli"
+];
+
 async function fetchEnkaCard(uid, avatarId) {
   const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
   const response = await axios.get(url, {
@@ -14,20 +42,6 @@ async function fetchEnkaCard(uid, avatarId) {
     headers: HEADERS
   });
   return Buffer.from(response.data);
-}
-
-async function fetchShowcaseChars(uid) {
-  const response = await axios.get(`https://enka.network/api/uid/${uid}`, { headers: HEADERS, timeout: 15000 });
-  const data = response.data;
-  if (!data.avatarInfoList) return [];
-  const results = [];
-  for (const avatar of data.avatarInfoList) {
-    const info = await getCharacterInfo(avatar.avatarId);
-    if (info && info.name) {
-      results.push({ name: info.name, avatarId: avatar.avatarId });
-    }
-  }
-  return results;
 }
 
 module.exports = {
@@ -110,18 +124,14 @@ module.exports = {
 
   async autocomplete(interaction) {
     const focused = interaction.options.getFocused();
-    if (!focused) return;
-
-    try {
-      const chars = await fetchShowcaseChars(UIDS.MAIN);
-      const choices = chars
-        .filter(c => c.name.toLowerCase().includes(focused.toLowerCase()))
-        .slice(0, 25)
-        .map(c => ({ name: c.name, value: c.name }));
-      await interaction.respond(choices);
-    } catch (error) {
-      console.error("Autocomplete error:", error.message);
-      await interaction.respond([]);
+    if (!focused) {
+      await interaction.respond(ALL_CHARACTERS.slice(0, 25).map(c => ({ name: c, value: c })));
+      return;
     }
+    const choices = ALL_CHARACTERS
+      .filter(c => c.toLowerCase().includes(focused.toLowerCase()))
+      .slice(0, 25)
+      .map(c => ({ name: c, value: c }));
+    await interaction.respond(choices);
   }
 };
