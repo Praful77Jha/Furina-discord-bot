@@ -3,7 +3,7 @@ const axios = require("axios");
 const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
 const { getCharacterInfo } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
-const { createCanvas, loadImageSafe, drawImageCover, drawReadabilityGradient, cvBarText } = require("../../canvasRenderer");
+const { createCanvas, loadImageSafe, drawImageCover, drawReadabilityGradient, cvBarText, roundRect } = require("../../canvasRenderer");
 
 const CARD_W = 900;
 const CARD_H = 500;
@@ -47,40 +47,46 @@ async function renderCard(playerInfo, avatar, charInfo, targetUid) {
   const ctx = canvas.getContext("2d");
   const style = getElementStyle(charInfo?.element);
 
-  ctx.fillStyle = "#12141C";
+  ctx.fillStyle = "#0D0F16";
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   const splash = await loadImageSafe(charInfo?.splashArt);
   if (splash) {
-    drawImageCover(ctx, splash, 0, 0, CARD_W * 0.55, CARD_H);
+    drawImageCover(ctx, splash, 0, 0, CARD_W * 0.52, CARD_H);
   }
   drawReadabilityGradient(ctx, CARD_W, CARD_H, "right");
 
   const colorHex = `#${style.color.toString(16).padStart(6, "0")}`;
   ctx.fillStyle = colorHex;
-  ctx.fillRect(0, 0, 8, CARD_H);
+  ctx.fillRect(0, 0, 6, CARD_H);
 
   const name = charInfo?.name || `Character ${avatar.avatarId}`;
   const level = avatar.propMap?.["4001"]?.val || "N/A";
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 40px sans-serif";
-  ctx.fillText(`${style.emoji} ${name}`, 40, 60);
+  ctx.font = "bold 38px sans-serif";
+  ctx.fillText(`${style.emoji} ${name}`, 40, 58);
 
-  ctx.font = "20px sans-serif";
-  ctx.fillStyle = "#B8C4D9";
-  ctx.fillText(`${playerInfo.nickname} - Lv.${level} - UID ${targetUid}`, 40, 90);
+  ctx.font = "18px sans-serif";
+  ctx.fillStyle = "#8899B0";
+  ctx.fillText(`${playerInfo.nickname}  •  Lv.${level}  •  UID ${targetUid}`, 40, 84);
+
+  const panelX = 480;
+  const panelW = CARD_W - panelX - 30;
+
+  roundRect(ctx, panelX - 16, 28, panelW + 32, 340, 12);
+  ctx.fillStyle = "rgba(255,255,255,0.04)";
+  ctx.fill();
 
   const stats = extractStats(avatar);
-  const panelX = 500;
-  let rowY = 150;
-  const rowGap = 38;
+  let rowY = 70;
+  const rowGap = 36;
 
-  ctx.font = "bold 18px sans-serif";
+  ctx.font = "bold 15px sans-serif";
   ctx.fillStyle = colorHex;
   ctx.fillText("STATS", panelX, rowY);
-  rowY += 34;
+  rowY += 30;
 
   const statRows = [
     ["Max HP", stats.hp.toLocaleString()],
@@ -92,38 +98,53 @@ async function renderCard(playerInfo, avatar, charInfo, targetUid) {
     ["Energy Recharge", stats.er]
   ];
 
-  ctx.font = "18px sans-serif";
   statRows.forEach(([label, value]) => {
     ctx.textAlign = "left";
-    ctx.fillStyle = "#B8C4D9";
-    ctx.font = "18px sans-serif";
+    ctx.fillStyle = "#7A8AA0";
+    ctx.font = "16px sans-serif";
     ctx.fillText(label, panelX, rowY);
     ctx.textAlign = "right";
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 20px sans-serif";
-    ctx.fillText(value, panelX + 360, rowY);
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText(value, panelX + panelW - 20, rowY);
     rowY += rowGap;
   });
 
   const cv = calculateCV(avatar.equipList);
+  const cvNum = parseFloat(cv);
   const { bar, tier } = cvBarText(cv);
-  rowY += 10;
+
+  let tierColor = "#FF6B6B";
+  if (cvNum >= 220) tierColor = "#FFD700";
+  else if (cvNum >= 180) tierColor = "#5CD7A6";
+  else if (cvNum >= 140) tierColor = "#4FC3F7";
+  else if (cvNum >= 100) tierColor = "#B8C4D9";
+
+  roundRect(ctx, panelX - 16, rowY - 8, panelW + 32, 90, 12);
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.fill();
+
+  rowY += 12;
   ctx.textAlign = "left";
-  ctx.fillStyle = "#B8C4D9";
-  ctx.font = "16px sans-serif";
+  ctx.fillStyle = "#7A8AA0";
+  ctx.font = "bold 14px sans-serif";
   ctx.fillText("ARTIFACT CV", panelX, rowY);
-  rowY += 30;
-  ctx.font = "bold 26px monospace";
-  ctx.fillStyle = "#FFD700";
+  rowY += 28;
+  ctx.font = "bold 22px monospace";
+  ctx.fillStyle = tierColor;
+  ctx.fillText(`${cv}`, panelX, rowY);
+  ctx.font = "bold 16px sans-serif";
+  ctx.fillStyle = tierColor;
+  ctx.fillText(`  ${tier}`, panelX + 70, rowY);
+  rowY += 28;
+  ctx.font = "16px monospace";
+  ctx.fillStyle = "#556677";
   ctx.fillText(bar, panelX, rowY);
-  ctx.font = "bold 22px sans-serif";
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(`${cv}  (${tier})`, panelX, rowY + 32);
 
   ctx.textAlign = "left";
-  ctx.font = "14px sans-serif";
-  ctx.fillStyle = "#6B7688";
-  ctx.fillText("Furina Discord Bot - Enka Network API", 40, CARD_H - 20);
+  ctx.font = "13px sans-serif";
+  ctx.fillStyle = "#445566";
+  ctx.fillText("Furina Discord Bot  •  Enka Network API", 40, CARD_H - 18);
 
   return canvas.toBuffer("image/png");
 }

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require("discord.js");
 const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
-const { createCanvas } = require("../../canvasRenderer");
+const { createCanvas, roundRect } = require("../../canvasRenderer");
 const { readJSON, writeJSON } = require("../../dataStore");
 
 const CHECKLIST_FILE = "reminderChecklist.json";
@@ -25,7 +25,7 @@ const DOMAIN_ROTATION = {
 };
 
 function todayKey() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD, changes at UTC midnight — daily state auto-"resets" by just being a new key
+  return new Date().toISOString().slice(0, 10);
 }
 
 function getUserChecklist(userId) {
@@ -52,47 +52,63 @@ async function renderReminderCard() {
   const isSunday = dayOfWeek === 0;
   const rotation = DOMAIN_ROTATION[dayOfWeek];
 
-  ctx.fillStyle = "#12141C";
+  ctx.fillStyle = "#0D0F16";
   ctx.fillRect(0, 0, CARD_W, CARD_H);
+
   ctx.fillStyle = "#4FC3F7";
-  ctx.fillRect(0, 0, CARD_W, 6);
+  ctx.fillRect(0, 0, CARD_W, 5);
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#FFFFFF";
   ctx.font = "bold 30px sans-serif";
-  ctx.fillText("🌅 Today's Genshin Schedule", 30, 55);
+  ctx.fillText("🌅 Today's Genshin Schedule", 30, 52);
 
-  ctx.font = "16px sans-serif";
-  ctx.fillStyle = "#B8C4D9";
-  ctx.fillText("Daily reset: 04:00 AM server time", 30, 82);
+  ctx.font = "15px sans-serif";
+  ctx.fillStyle = "#7A8AA0";
+  ctx.fillText("Daily reset: 04:00 AM server time", 30, 78);
 
-  let y = 130;
-  ctx.font = "bold 18px sans-serif";
+  let y = 120;
+
+  roundRect(ctx, 20, y - 20, CARD_W - 40, 100, 10);
+  ctx.fillStyle = "rgba(79,195,247,0.06)";
+  ctx.fill();
+
+  ctx.font = "bold 17px sans-serif";
   ctx.fillStyle = "#4FC3F7";
-  ctx.fillText("📚 Farmable Talent Books Today", 30, y);
-  y += 26;
-  ctx.font = "17px sans-serif";
-  ctx.fillStyle = "#E4E9F2";
-  ctx.fillText(isSunday ? "All books available today!" : rotation.talent, 30, y);
+  ctx.fillText("📚 Farmable Talent Books Today", 36, y);
+  y += 28;
+  ctx.font = "15px sans-serif";
+  ctx.fillStyle = "#C8D0DC";
+  ctx.fillText(isSunday ? "All books available today!" : rotation.talent, 36, y);
 
-  y += 50;
-  ctx.font = "bold 18px sans-serif";
-  ctx.fillStyle = "#4FC3F7";
-  ctx.fillText("⚔️ Farmable Weapon Materials Today", 30, y);
-  y += 26;
-  ctx.font = "17px sans-serif";
-  ctx.fillStyle = "#E4E9F2";
-  ctx.fillText(isSunday ? "All weapon materials available today!" : rotation.weapon, 30, y);
+  y += 48;
+  roundRect(ctx, 20, y - 20, CARD_W - 40, 100, 10);
+  ctx.fillStyle = "rgba(79,195,247,0.06)";
+  ctx.fill();
 
-  y += 50;
-  ctx.font = "bold 18px sans-serif";
+  ctx.font = "bold 17px sans-serif";
   ctx.fillStyle = "#4FC3F7";
+  ctx.fillText("⚔️ Farmable Weapon Materials Today", 36, y);
+  y += 28;
+  ctx.font = "15px sans-serif";
+  ctx.fillStyle = "#C8D0DC";
+  ctx.fillText(isSunday ? "All weapon materials available today!" : rotation.weapon, 36, y);
+
+  y += 48;
   const abyssNote = (dayOfMonth === 1 || dayOfMonth === 16) ? "⚠️ Spiral Abyss resets today!" : "🌀 Spiral Abyss in progress";
-  ctx.fillText(abyssNote, 30, y);
+  const abyssColor = (dayOfMonth === 1 || dayOfMonth === 16) ? "#FFD700" : "#4FC3F7";
+
+  roundRect(ctx, 20, y - 20, CARD_W - 40, 40, 10);
+  ctx.fillStyle = "rgba(79,195,247,0.06)";
+  ctx.fill();
+
+  ctx.font = "bold 17px sans-serif";
+  ctx.fillStyle = abyssColor;
+  ctx.fillText(abyssNote, 36, y);
 
   ctx.font = "13px sans-serif";
-  ctx.fillStyle = "#6B7688";
-  ctx.fillText("Furina Discord Bot • Daily Scheduler — tick your checklist below", 30, CARD_H - 20);
+  ctx.fillStyle = "#445566";
+  ctx.fillText("Furina Discord Bot  •  Daily Scheduler — tick your checklist below", 30, CARD_H - 18);
 
   return canvas.toBuffer("image/png");
 }
@@ -126,11 +142,6 @@ module.exports = {
     const buffer = await renderReminderCard();
     const attachment = new AttachmentBuilder(buffer, { name: "reminders.png" });
 
-    // NOTE: the checklist buttons reflect whoever runs the command at post
-    // time. Since Discord messages are shared, other users tapping the
-    // buttons get their OWN progress tracked (see handleChecklistToggle) —
-    // they just won't see their checkmarks reflected on this shared image,
-    // only in the ephemeral confirmation they get back.
     const row = buildChecklistRow(interaction.user.id);
     await interaction.editReply({ files: [attachment], components: [row] });
   },

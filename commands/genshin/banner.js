@@ -2,12 +2,12 @@ const { SlashCommandBuilder, AttachmentBuilder } = require("discord.js");
 const axios = require("axios");
 const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
 const { getElementStyle } = require("../../elementStyle");
-const { createCanvas, loadImageSafe, drawImageCover, drawReadabilityGradient } = require("../../canvasRenderer");
+const { createCanvas, loadImageSafe, drawImageCover, drawReadabilityGradient, roundRect } = require("../../canvasRenderer");
 
 const CARD_W = 800;
-const CARD_H = 320;
+const CARD_H = 360;
 
-async function renderBannerCard(banner) {
+async function renderBannerCard(banner, index) {
   const canvas = createCanvas(CARD_W, CARD_H);
   const ctx = canvas.getContext("2d");
 
@@ -15,7 +15,7 @@ async function renderBannerCard(banner) {
   const style = getElementStyle(fiveStarChar?.element);
   const colorHex = `#${style.color.toString(16).padStart(6, "0")}`;
 
-  ctx.fillStyle = "#12141C";
+  ctx.fillStyle = "#0D0F16";
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   const art = await loadImageSafe(fiveStarChar?.icon);
@@ -23,27 +23,36 @@ async function renderBannerCard(banner) {
   drawReadabilityGradient(ctx, CARD_W, CARD_H, "bottom");
 
   ctx.fillStyle = colorHex;
-  ctx.fillRect(0, 0, CARD_W, 6);
+  ctx.fillRect(0, 0, CARD_W, 5);
+
+  const tag = index === 0 ? "CURRENT" : "UPCOMING";
+  ctx.fillStyle = colorHex;
+  roundRect(ctx, 24, 18, ctx.measureText(tag).width + 28, 26, 6);
+  ctx.fill();
+  ctx.fillStyle = "#000000";
+  ctx.font = "bold 13px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(tag, 38, 36);
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 30px sans-serif";
-  ctx.fillText(`${style.emoji} ${banner.name || "Event Wish Banner"}`, 30, CARD_H - 110);
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillText(`${style.emoji} ${banner.name || "Event Wish Banner"}`, 30, CARD_H - 100);
 
   const charList = (banner.characters || []).map(c => c.name).join(", ") || "N/A";
-  ctx.font = "18px sans-serif";
-  ctx.fillStyle = "#E4E9F2";
-  ctx.fillText(`Featured: ${charList}`, 30, CARD_H - 78);
+  ctx.font = "16px sans-serif";
+  ctx.fillStyle = "#C8D0DC";
+  ctx.fillText(`Featured: ${charList}`, 30, CARD_H - 72);
 
   const weaponList = (banner.weapons || []).map(w => w.name).join(", ");
   if (weaponList) {
-    ctx.fillText(`Weapons: ${weaponList}`, 30, CARD_H - 50);
+    ctx.fillText(`Weapons: ${weaponList}`, 30, CARD_H - 48);
   }
 
-  ctx.font = "16px sans-serif";
-  ctx.fillStyle = "#B8C4D9";
+  ctx.font = "14px sans-serif";
+  ctx.fillStyle = "#7A8AA0";
   const endLabel = banner.end_time ? new Date(banner.end_time * 1000).toLocaleDateString() : "End of Phase";
-  ctx.fillText(`Ends: ${endLabel}${banner.version ? `  •  v${banner.version}` : ""}`, 30, CARD_H - 20);
+  ctx.fillText(`Ends: ${endLabel}${banner.version ? `  •  v${banner.version}` : ""}`, 30, CARD_H - 22);
 
   return canvas.toBuffer("image/png");
 }
@@ -72,7 +81,7 @@ module.exports = {
       }
 
       const cards = banners.slice(0, 4);
-      const buffers = await Promise.all(cards.map(renderBannerCard));
+      const buffers = await Promise.all(cards.map((b, i) => renderBannerCard(b, i)));
       const attachments = buffers.map((buf, i) => new AttachmentBuilder(buf, { name: `banner${i}.png` }));
 
       await interaction.editReply({ files: attachments });
