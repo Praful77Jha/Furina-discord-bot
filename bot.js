@@ -57,6 +57,16 @@ client.once('ready', async () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  // /build character-select menu
+  if (interaction.isStringSelectMenu() && interaction.customId === 'select_build_character') {
+    try {
+      await client.commands.get('build').handleCharacterSelect(interaction);
+    } catch (error) {
+      console.error('Select menu handler error:', error);
+    }
+    return;
+  }
+
   // /codes "mark claimed" buttons — customId: codeclaim_{uid}_{code}
   if (interaction.isButton() && interaction.customId.startsWith('codeclaim_')) {
     try {
