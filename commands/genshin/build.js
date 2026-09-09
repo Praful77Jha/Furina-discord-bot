@@ -6,8 +6,51 @@ const { getElementStyle } = require("../../elementStyle");
 
 const showcaseCache = new Map();
 
+const NAME_CACHE = new Map();
+
+async function resolveCharName(avatarId) {
+  if (NAME_CACHE.has(avatarId)) return NAME_CACHE.get(avatarId);
+
+  const info = await getCharacterInfo(avatarId);
+  if (info && info.name && !info.name.startsWith("Character ")) {
+    NAME_CACHE.set(avatarId, info.name);
+    return info.name;
+  }
+
+  try {
+    const res = await axios.get(`https://api.ambr.top/v2/en/character`, { timeout: 8000 });
+    const chars = res.data?.data || {};
+    for (const [id, data] of Object.entries(chars)) {
+      if (String(data.id) === String(avatarId)) {
+        NAME_CACHE.set(avatarId, data.name);
+        return data.name;
+      }
+    }
+  } catch (e) {}
+
+  try {
+    const res = await axios.get(`https://genshin.jmp.blue/characters/${avatarId}`, { timeout: 8000 });
+    if (res.data?.name) {
+      NAME_CACHE.set(avatarId, res.data.name);
+      return res.data.name;
+    }
+  } catch (e) {}
+
+  const known = {
+    "10000125": "Columbina", "10000126": "Iansan", "10000127": "Skirk",
+    "10000128": "Dainsleif", "10000129": "Capitano", "10000130": "Lauma"
+  };
+  if (known[avatarId]) {
+    NAME_CACHE.set(avatarId, known[avatarId]);
+    return known[avatarId];
+  }
+
+  NAME_CACHE.set(avatarId, `Character ${avatarId}`);
+  return `Character ${avatarId}`;
+}
+
 async function fetchEnkaCard(uid, avatarId) {
-  const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
+  const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true&quality=10`;
   const response = await axios.get(url, { responseType: "arraybuffer", timeout: 15000 });
   return Buffer.from(response.data);
 }
@@ -51,10 +94,11 @@ module.exports = {
       showcaseCache.set(targetUid, { playerInfo, avatarList, fetchedAt: Date.now() });
 
       const selectOptions = await Promise.all(avatarList.map(async (avatar, index) => {
+        const charName = await resolveCharName(avatar.avatarId);
         const charInfo = await getCharacterInfo(avatar.avatarId);
         const style = getElementStyle(charInfo?.element);
         return {
-          label: `${style.emoji} ${charInfo?.name || `Character ${avatar.avatarId}`}`,
+          label: `${style.emoji} ${charName}`,
           description: `Level ${avatar.propMap["4001"]?.val || "N/A"} - ${style.label}`,
           value: `${targetUid}_${index}`
         };
@@ -75,9 +119,11 @@ module.exports = {
         const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
         await interaction.editReply({ files: [attachment], components: [row] });
       } catch (cardErr) {
+        const charName = await resolveCharName(firstChar.avatarId);
+        const charInfo = await getCharacterInfo(firstChar.avatarId);
         const style = getElementStyle(charInfo?.element);
         const embed = new EmbedBuilder()
-          .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
+          .setTitle(`${style.emoji} ${charName}`)
           .setColor(style.color)
           .setDescription(`Enka card unavailable — showing basic stats.\nUID: \`${targetUid}\``)
           .setFooter({ text: "Furina Discord Bot • Enka Network" });
@@ -112,10 +158,11 @@ module.exports = {
       const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
       await interaction.editReply({ files: [attachment] });
     } catch (error) {
+      const charName = await resolveCharName(avatar.avatarId);
       const charInfo = await getCharacterInfo(avatar.avatarId);
       const style = getElementStyle(charInfo?.element);
       const embed = new EmbedBuilder()
-        .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
+        .setTitle(`${style.emoji} ${charName}`)
         .setColor(style.color)
         .setDescription(`Enka card unavailable — showing basic stats.\nUID: \`${targetUid}\``)
         .setFooter({ text: "Furina Discord Bot • Enka Network" });
