@@ -2,23 +2,43 @@ const { google } = require('googleapis');
 const path = require('path');
 const fs = require('fs');
 
-// Prefer GOOGLE_CREDENTIALS_JSON (the full service-account JSON pasted as one
-// env var) so this works on hosts that deploy from git and never see
-// credentials.json. Falls back to the local file for local dev.
 const credsPath = path.join(__dirname, '../credentials.json');
 const authOptions = { scopes: ['https://www.googleapis.com/auth/spreadsheets'] };
 
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
-  authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
-} else if (fs.existsSync(credsPath)) {
-  authOptions.keyFile = credsPath;
-} else {
-  throw new Error('Missing Google credentials: set GOOGLE_CREDENTIALS_JSON env var or add credentials.json locally.');
+function parseCreds(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch (firstErr) {
+    const fixed = raw.trim()
+      .replace(/'/g, '"')
+      .replace(/([{,]\s*)([A-Za-z0-9_]+)\s*:/g, '$1"$2":');
+    try {
+      return JSON.parse(fixed);
+    } catch (secondErr) {
+      throw new Error(`GOOGLE_CREDENTIALS_JSON is not valid JSON (${secondErr.message}). Re-paste the service-account file as strict single-line JSON.`);
+    }
+  }
 }
 
-const auth = new google.auth.GoogleAuth(authOptions);
+let sheets = null;
+try {
+  if (process.env.GOOGLE_CREDENTIALS_JSON) {
+    authOptions.credentials = parseCreds(process.env.GOOGLE_CREDENTIALS_JSON);
+  } else if (fs.existsSync(credsPath)) {
+    authOptions.keyFile = credsPath;
+  } else {
+    throw new Error('Missing Google credentials: set GOOGLE_CREDENTIALS_JSON env var or add credentials.json locally.');
+  }
 
-const sheets = google.sheets({ version: 'v4', auth });
+  const auth = new google.auth.GoogleAuth(authOptions);
+  sheets = google.sheets({ version: 'v4', auth });
+} catch (err) {
+  // Never crash the whole bot over Sheets - tracking commands report it instead.
+  console.error('Google Sheets disabled:', err.message);
+  sheets = new Proxy({}, {
+    get: () => () => { throw new Error('Google Sheets unavailable: fix GOOGLE_CREDENTIALS_JSON on the host.'); }
+  });
+}
 const HISTORY_SHEET_NAME = '_History';
 
 // Multi-Sheet Configuration Object
