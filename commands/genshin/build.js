@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, AttachmentBuilder } = require("discord.js");
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, AttachmentBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
 const { getCharacterInfo } = require("../../enkaCharacterData");
@@ -68,10 +68,22 @@ module.exports = {
       );
 
       const firstChar = avatarList[0];
-      const buffer = await fetchEnkaCard(targetUid, firstChar.avatarId);
-      const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
+      const charInfo = await getCharacterInfo(firstChar.avatarId);
 
-      await interaction.editReply({ files: [attachment], components: [row] });
+      try {
+        const buffer = await fetchEnkaCard(targetUid, firstChar.avatarId);
+        const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
+        await interaction.editReply({ files: [attachment], components: [row] });
+      } catch (cardErr) {
+        const style = getElementStyle(charInfo?.element);
+        const embed = new EmbedBuilder()
+          .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
+          .setColor(style.color)
+          .setDescription(`Enka card unavailable — showing basic stats.\nUID: \`${targetUid}\``)
+          .setFooter({ text: "Furina Discord Bot • Enka Network" });
+
+        await interaction.editReply({ embeds: [embed], components: [row] });
+      }
 
     } catch (error) {
       console.error(error);
@@ -100,8 +112,15 @@ module.exports = {
       const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
       await interaction.editReply({ files: [attachment] });
     } catch (error) {
-      console.error(error);
-      await interaction.editReply({ content: "Failed to fetch Enka card. Try again later.", components: [] });
+      const charInfo = await getCharacterInfo(avatar.avatarId);
+      const style = getElementStyle(charInfo?.element);
+      const embed = new EmbedBuilder()
+        .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
+        .setColor(style.color)
+        .setDescription(`Enka card unavailable — showing basic stats.\nUID: \`${targetUid}\``)
+        .setFooter({ text: "Furina Discord Bot • Enka Network" });
+
+      await interaction.editReply({ embeds: [embed], components: [] });
     }
   }
 };
