@@ -1,56 +1,11 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, AttachmentBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
 const { getCharacterInfo } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
 
-const showcaseCache = new Map();
-
-const NAME_CACHE = new Map();
-
-async function resolveCharName(avatarId) {
-  if (NAME_CACHE.has(avatarId)) return NAME_CACHE.get(avatarId);
-
-  const info = await getCharacterInfo(avatarId);
-  if (info && info.name && !info.name.startsWith("Character ")) {
-    NAME_CACHE.set(avatarId, info.name);
-    return info.name;
-  }
-
-  try {
-    const res = await axios.get(`https://api.ambr.top/v2/en/character`, { timeout: 8000 });
-    const chars = res.data?.data || {};
-    for (const [id, data] of Object.entries(chars)) {
-      if (String(data.id) === String(avatarId)) {
-        NAME_CACHE.set(avatarId, data.name);
-        return data.name;
-      }
-    }
-  } catch (e) {}
-
-  try {
-    const res = await axios.get(`https://genshin.jmp.blue/characters/${avatarId}`, { timeout: 8000 });
-    if (res.data?.name) {
-      NAME_CACHE.set(avatarId, res.data.name);
-      return res.data.name;
-    }
-  } catch (e) {}
-
-  const known = {
-    "10000125": "Columbina", "10000126": "Iansan", "10000127": "Skirk",
-    "10000128": "Dainsleif", "10000129": "Capitano", "10000130": "Lauma"
-  };
-  if (known[avatarId]) {
-    NAME_CACHE.set(avatarId, known[avatarId]);
-    return known[avatarId];
-  }
-
-  NAME_CACHE.set(avatarId, `Character ${avatarId}`);
-  return `Character ${avatarId}`;
-}
-
 async function fetchEnkaCard(uid, avatarId) {
-  const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true&quality=10`;
+  const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
   const response = await axios.get(url, { responseType: "arraybuffer", timeout: 15000 });
   return Buffer.from(response.data);
 }
@@ -58,14 +13,17 @@ async function fetchEnkaCard(uid, avatarId) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("build")
-    .setDescription("Fetch Genshin character showcase card from Enka.Network.")
+    .setDescription("Fetch Genshin character build from Enka.Network.")
     .addStringOption(option =>
       option.setName("account").setDescription("Select account preset").addChoices(
         { name: "NORMIE (MAIN)", value: "main" },
         { name: "NOT_NORMIE (ALT)", value: "alt" }
       )
     )
-    .addStringOption(option => option.setName("uid").setDescription("Or type custom UID directly")),
+    .addStringOption(option => option.setName("uid").setDescription("Or type custom UID directly"))
+    .addStringOption(option =>
+      option.setName("character").setDescription("Character name (e.g. Hu Tao, Columbina)").setRequired(true)
+    ),
 
   async execute(interaction) {
     if (interaction.channel.parentId !== CATEGORY_ID) {
@@ -79,95 +37,55 @@ module.exports = {
 
     const accountChoice = interaction.options.getString("account");
     const customUid = interaction.options.getString("uid");
-    let targetUid = customUid || (accountChoice === "alt" ? UIDS.ALT : UIDS.MAIN);
+    const characterName = interaction.options.getString("character");
+    const targetUid = customUid || (accountChoice === "alt" ? UIDS.ALT : UIDS.MAIN);
 
     try {
       const response = await axios.get(`https://enka.network/api/uid/${targetUid}`);
       const data = response.data;
 
       if (!data.avatarInfoList || data.avatarInfoList.length === 0) {
-        return interaction.editReply(`No showcased characters found for UID \`${targetUid}\`. Check character showcase settings in-game.`);
+        return interaction.editReply(`No showcased characters found for UID \`${targetUid}\`.`);
       }
 
-      const playerInfo = data.playerInfo;
       const avatarList = data.avatarInfoList;
-      showcaseCache.set(targetUid, { playerInfo, avatarList, fetchedAt: Date.now() });
+      const searchName = characterName.toLowerCase().trim();
+      let matchedAvatar = null;
 
-      const selectOptions = await Promise.all(avatarList.map(async (avatar, index) => {
-        const charName = await resolveCharName(avatar.avatarId);
-        const charInfo = await getCharacterInfo(avatar.avatarId);
-        const style = getElementStyle(charInfo?.element);
-        return {
-          label: `${style.emoji} ${charName}`,
-          description: `Level ${avatar.propMap["4001"]?.val || "N/A"} - ${style.label}`,
-          value: `${targetUid}_${index}`
-        };
-      }));
+      for (const avatar of avatarList) {
+        const info = await getCharacterInfo(avatar.avatarId);
+        if (info && info.name.toLowerCase().includes(searchName)) {
+          matchedAvatar = avatar;
+          break;
+        }
+      }
 
-      const row = new ActionRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-          .setCustomId("select_build_character")
-          .setPlaceholder("Select a showcased character...")
-          .addOptions(selectOptions)
-      );
-
-      const firstChar = avatarList[0];
-      const charInfo = await getCharacterInfo(firstChar.avatarId);
+      if (!matchedAvatar) {
+        const charList = await Promise.all(avatarList.map(async (a) => {
+          const info = await getCharacterInfo(a.avatarId);
+          return info?.name || "Unknown";
+        }));
+        return interaction.editReply(`**${characterName}** not found in showcase.\nAvailable: ${charList.join(", ")}`);
+      }
 
       try {
-        const buffer = await fetchEnkaCard(targetUid, firstChar.avatarId);
+        const buffer = await fetchEnkaCard(targetUid, matchedAvatar.avatarId);
         const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
-        await interaction.editReply({ files: [attachment], components: [row] });
+        await interaction.editReply({ files: [attachment] });
       } catch (cardErr) {
-        const charName = await resolveCharName(firstChar.avatarId);
-        const charInfo = await getCharacterInfo(firstChar.avatarId);
+        const charInfo = await getCharacterInfo(matchedAvatar.avatarId);
         const style = getElementStyle(charInfo?.element);
         const embed = new EmbedBuilder()
-          .setTitle(`${style.emoji} ${charName}`)
+          .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
           .setColor(style.color)
-          .setDescription(`Enka card unavailable — showing basic stats.\nUID: \`${targetUid}\``)
+          .setDescription(`Enka card unavailable — try again later.\nUID: \`${targetUid}\``)
           .setFooter({ text: "Furina Discord Bot • Enka Network" });
-
-        await interaction.editReply({ embeds: [embed], components: [row] });
+        await interaction.editReply({ embeds: [embed] });
       }
 
     } catch (error) {
       console.error(error);
-      return interaction.editReply(`Failed to fetch data for UID \`${targetUid}\`. API might be down or UID is invalid.`);
-    }
-  },
-
-  async handleCharacterSelect(interaction) {
-    const [targetUid, indexStr] = interaction.values[0].split("_");
-    const index = parseInt(indexStr, 10);
-
-    const cached = showcaseCache.get(targetUid);
-    if (!cached) {
-      return interaction.reply({ content: "This showcase has expired - run `/build` again to refresh it.", ephemeral: true });
-    }
-
-    const avatar = cached.avatarList[index];
-    if (!avatar) {
-      return interaction.reply({ content: "Couldn't find that character in the showcase.", ephemeral: true });
-    }
-
-    await interaction.deferUpdate();
-
-    try {
-      const buffer = await fetchEnkaCard(targetUid, avatar.avatarId);
-      const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
-      await interaction.editReply({ files: [attachment] });
-    } catch (error) {
-      const charName = await resolveCharName(avatar.avatarId);
-      const charInfo = await getCharacterInfo(avatar.avatarId);
-      const style = getElementStyle(charInfo?.element);
-      const embed = new EmbedBuilder()
-        .setTitle(`${style.emoji} ${charName}`)
-        .setColor(style.color)
-        .setDescription(`Enka card unavailable — showing basic stats.\nUID: \`${targetUid}\``)
-        .setFooter({ text: "Furina Discord Bot • Enka Network" });
-
-      await interaction.editReply({ embeds: [embed], components: [] });
+      return interaction.editReply(`Failed to fetch data for UID \`${targetUid}\`.`);
     }
   }
 };
