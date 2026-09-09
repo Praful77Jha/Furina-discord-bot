@@ -89,12 +89,22 @@ async function fetchAndMerge(uid) {
 
   if (akashaChars) {
     // Full history (live Akasha or static fallback), tagged with live status
-    return akashaChars.map(c => {
+    const merged = akashaChars.map(c => {
       const liveId = liveByName.get(c.name.toLowerCase());
       return liveId !== undefined
         ? { name: c.name, avatarId: liveId, isLive: true }
         : { name: c.name, avatarId: c.avatarId, isLive: false };
     });
+    // Safety net: live characters missing from history (new showcase while
+    // Akasha is unreachable) still get listed so their cards always work.
+    const known = new Set(merged.map(c => c.name.toLowerCase()));
+    for (const [lname, avid] of liveByName) {
+      if (!known.has(lname)) {
+        const info = await getCharacterInfo(avid);
+        merged.push({ name: info?.name || lname, avatarId: avid, isLive: true });
+      }
+    }
+    return merged;
   }
 
   // Akasha failed (e.g. 403) - degrade to just the live Enka showcase so autocomplete
