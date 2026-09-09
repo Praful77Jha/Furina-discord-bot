@@ -27,7 +27,7 @@ function resolveCli() {
   }
   return null;
 }
-const RUN_TIMEOUT_MS = 240000;
+const RUN_TIMEOUT_MS = 600000;
 
 // Owner-only for now. Later: add user IDs to ALLOWED_USER_IDS
 // (comma-separated, in .env) - no code change needed.
