@@ -5,6 +5,13 @@ const { getCharacterInfo, findCharacterByName } = require("../../enkaCharacterDa
 const { getElementStyle } = require("../../elementStyle");
 
 const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
+// Akasha's API blocks most script clients (403) but answers Node/axios
+// with this header combo - verified live. Static list below is fallback.
+const AKASHA_HEADERS = {
+  "User-Agent": "akasha-py",
+  "Accept": "application/json",
+  "Referer": "https://akasha.cv/"
+};
 // Akasha's API sits behind Cloudflare and 403s every server-side request,
 // so the user's Akasha history (20 chars, from their profile) is kept as a
 // static list instead of being fetched live.
@@ -22,9 +29,28 @@ const AKASHA_HISTORY = [
 const SHOWCASE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min - how long before a background refresh kicks off
 const showcaseCache = new Map(); // uid -> { data: [{ name, avatarId, isLive }], fetchedAt, refreshing }
 
-// Static Akasha history with avatarIds resolved from local character data.
+// Live Akasha history first, static profile list as fallback.
 // IDs are Numbers so they match Enka's avatarId type in the live-set check.
 async function getAkashaCharacters(uid) {
+  try {
+    const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
+      headers: AKASHA_HEADERS,
+      timeout: 8000
+    });
+    const raw = response.data.data || response.data;
+
+    // Dedupe by characterId - Akasha can have multiple calc entries per character
+    const byId = new Map();
+    for (const entry of raw) {
+      if (!byId.has(entry.characterId)) {
+        byId.set(entry.characterId, { name: entry.name, avatarId: Number(entry.characterId) });
+      }
+    }
+    if (byId.size > 0) return [...byId.values()];
+  } catch (err) {
+    console.error("Akasha live fetch failed, using static history:", err.response?.status || err.message);
+  }
+
   const out = [];
   for (const name of AKASHA_HISTORY) {
     try {
@@ -159,29 +185,26 @@ module.exports = {
         return interaction.editReply(`**${characterName}** not found in your Akasha history.\nAvailable: ${charList}`);
       }
 
-      if (!matchedAvatar.isLive) {
-        const charInfo = await getCharacterInfo(matchedAvatar.avatarId);
-        const style = getElementStyle(charInfo?.element);
-        const embed = new EmbedBuilder()
-          .setTitle(`${style.emoji} ${charInfo?.name || matchedAvatar.name}`)
-          .setColor(style.color)
-          .setDescription(`**${matchedAvatar.name}** isn't in the current in-game showcase, so no live card is available.\nSwap them into your in-game Character Showcase to get a card here.`);
-        return interaction.editReply({ embeds: [embed] });
+      // Always attempt the card first - Enka sometimes still serves a
+      // recently removed character from cache. Notice below on failure.
+      if (matchedAvatar.avatarId) {
+        try {
+          const buffer = await fetchEnkaCard(targetUid, matchedAvatar.avatarId);
+          const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
+          await interaction.editReply({ files: [attachment] });
+          return;
+        } catch (cardErr) {
+          console.error("Card fetch failed:", cardErr.message);
+        }
       }
 
-      try {
-        const buffer = await fetchEnkaCard(targetUid, matchedAvatar.avatarId);
-        const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
-        await interaction.editReply({ files: [attachment] });
-      } catch (cardErr) {
-        const charInfo = await getCharacterInfo(matchedAvatar.avatarId);
-        const style = getElementStyle(charInfo?.element);
-        const embed = new EmbedBuilder()
-          .setTitle(`${style.emoji} ${charInfo?.name || matchedAvatar.name}`)
-          .setColor(style.color)
-          .setDescription(`Enka card unavailable.\nUID: \`${targetUid}\``);
-        await interaction.editReply({ embeds: [embed] });
-      }
+      const charInfo = await getCharacterInfo(matchedAvatar.avatarId);
+      const style = getElementStyle(charInfo?.element);
+      const embed = new EmbedBuilder()
+        .setTitle(`${style.emoji} ${charInfo?.name || matchedAvatar.name}`)
+        .setColor(style.color)
+        .setDescription(`**${matchedAvatar.name}** has no card available right now - they aren't in the current in-game showcase.\nSwap them into your in-game Character Showcase to get a card here.`);
+      await interaction.editReply({ embeds: [embed] });
 
     } catch (error) {
       console.error("Build error:", error.message);
