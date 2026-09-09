@@ -4,8 +4,8 @@ const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
 const { getElementStyle } = require("../../elementStyle");
 const { createCanvas, loadImageSafe, drawImageCover, drawReadabilityGradient, roundRect } = require("../../canvasRenderer");
 
-const CARD_W = 800;
-const CARD_H = 360;
+const CARD_W = 900;
+const CARD_H = 400;
 
 async function renderBannerCard(banner, index) {
   const canvas = createCanvas(CARD_W, CARD_H);
@@ -15,7 +15,7 @@ async function renderBannerCard(banner, index) {
   const style = getElementStyle(fiveStarChar?.element);
   const colorHex = `#${style.color.toString(16).padStart(6, "0")}`;
 
-  ctx.fillStyle = "#0D0F16";
+  ctx.fillStyle = "#0B0E14";
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   const art = await loadImageSafe(fiveStarChar?.icon);
@@ -23,36 +23,42 @@ async function renderBannerCard(banner, index) {
   drawReadabilityGradient(ctx, CARD_W, CARD_H, "bottom");
 
   ctx.fillStyle = colorHex;
-  ctx.fillRect(0, 0, CARD_W, 5);
+  ctx.fillRect(0, 0, CARD_W, 4);
 
-  const tag = index === 0 ? "CURRENT" : "UPCOMING";
+  const tag = index === 0 ? "CURRENT BANNER" : "UPCOMING BANNER";
+  const tagWidth = ctx.measureText(tag).width + 24;
+  roundRect(ctx, 24, 20, tagWidth, 28, 6);
   ctx.fillStyle = colorHex;
-  roundRect(ctx, 24, 18, ctx.measureText(tag).width + 28, 26, 6);
   ctx.fill();
   ctx.fillStyle = "#000000";
-  ctx.font = "bold 13px sans-serif";
+  ctx.font = "bold 12px sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText(tag, 38, 36);
+  ctx.fillText(tag, 36, 39);
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 28px sans-serif";
-  ctx.fillText(`${style.emoji} ${banner.name || "Event Wish Banner"}`, 30, CARD_H - 100);
+  ctx.font = "bold 32px sans-serif";
+  ctx.fillText(banner.name || "Event Wish", 30, CARD_H - 120);
 
-  const charList = (banner.characters || []).map(c => c.name).join(", ") || "N/A";
-  ctx.font = "16px sans-serif";
-  ctx.fillStyle = "#C8D0DC";
-  ctx.fillText(`Featured: ${charList}`, 30, CARD_H - 72);
+  const charList = (banner.characters || []).map(c => {
+    const s = getElementStyle(c.element);
+    return `${s.emoji} ${c.name}`;
+  }).join("  ");
+  ctx.font = "17px sans-serif";
+  ctx.fillStyle = "#D0D8E4";
+  ctx.fillText(charList || "N/A", 30, CARD_H - 88);
 
   const weaponList = (banner.weapons || []).map(w => w.name).join(", ");
   if (weaponList) {
-    ctx.fillText(`Weapons: ${weaponList}`, 30, CARD_H - 48);
+    ctx.fillStyle = "#FFD700";
+    ctx.font = "15px sans-serif";
+    ctx.fillText(`⚔ ${weaponList}`, 30, CARD_H - 62);
   }
 
   ctx.font = "14px sans-serif";
-  ctx.fillStyle = "#7A8AA0";
+  ctx.fillStyle = "#6B7A8C";
   const endLabel = banner.end_time ? new Date(banner.end_time * 1000).toLocaleDateString() : "End of Phase";
-  ctx.fillText(`Ends: ${endLabel}${banner.version ? `  •  v${banner.version}` : ""}`, 30, CARD_H - 22);
+  ctx.fillText(`Ends: ${endLabel}${banner.version ? `  •  v${banner.version}` : ""}`, 30, CARD_H - 24);
 
   return canvas.toBuffer("image/png");
 }
