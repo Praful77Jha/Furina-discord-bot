@@ -12,7 +12,7 @@ async function fetchEnkaCard(uid, avatarId) {
   const response = await axios.get(url, {
     responseType: "arraybuffer",
     timeout: 15000,
-    headers: { "User-Agent": "FurinaDiscordBot/1.0" }
+    headers: HEADERS
   });
   return Buffer.from(response.data);
 }
@@ -93,7 +93,7 @@ module.exports = {
 
     const avatar = cached.avatarList[index];
     if (!avatar) {
-      return interaction.reply({ content: "Character not found in showcase.", ephemeral: true });
+      return interaction.reply({ content: "Character not found.", ephemeral: true });
     }
 
     await interaction.deferUpdate();
@@ -108,8 +108,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle(`${style.emoji} ${charInfo?.name || "Unknown"}`)
         .setColor(style.color)
-        .setDescription(`Enka card unavailable.\nUID: \`${targetUid}\``)
-        .setFooter({ text: "Furina Discord Bot • Enka Network" });
+        .setDescription(`Enka card unavailable.\nUID: \`${targetUid}\``);
       await interaction.editReply({ embeds: [embed], components: [] });
     }
   }
