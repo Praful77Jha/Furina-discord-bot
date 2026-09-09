@@ -224,7 +224,9 @@ function runCli(prompt, apiKey) {
       ...process.env,
       OPENCODE_API_KEY: apiKey,
       ZEN_API_KEY: apiKey,
-      OPENCODE_DISABLE_AUTOUPDATE: "1"
+      OPENCODE_DISABLE_AUTOUPDATE: "1",
+      OPENCODE_DISABLE_LSP_DOWNLOAD: "1",
+      OPENCODE_DISABLE_MODELS_FETCH: "1"
     };
     // Prompt passed as argv (no shell). Leading dashes stripped so user
     // input can never be parsed as CLI flags.
