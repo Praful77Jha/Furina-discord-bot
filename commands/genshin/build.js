@@ -5,18 +5,26 @@ const { getCharacterInfo } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
 
 const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
+// Akasha sits behind Cloudflare and can 403 requests from datacenter IPs / bare headers.
+// akasha-py (a working wrapper) just sends a plain UA string, so mimic that rather than
+// our custom bot UA - and add Accept/Referer since Cloudflare sometimes checks those too.
+const AKASHA_HEADERS = {
+  "User-Agent": "akasha-py",
+  "Accept": "application/json",
+  "Referer": "https://akasha.cv/"
+};
 
 // Cache of the merged Akasha+Enka character list per UID, so autocomplete
 // doesn't have to hit both APIs on every keystroke.
-const SHOWCASE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
-const showcaseCache = new Map(); // uid -> { data: [{ name, avatarId, isLive }], fetchedAt }
+const SHOWCASE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min - how long before a background refresh kicks off
+const showcaseCache = new Map(); // uid -> { data: [{ name, avatarId, isLive }], fetchedAt, refreshing }
 
 // Full character history from Akasha.cv (everything ever calculated, not just live showcase)
 async function getAkashaCharacters(uid) {
   try {
     const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
-      headers: HEADERS,
-      timeout: 15000
+      headers: AKASHA_HEADERS,
+      timeout: 8000
     });
     const raw = response.data.data || response.data;
 
@@ -29,42 +37,65 @@ async function getAkashaCharacters(uid) {
     }
     return [...byId.values()];
   } catch (err) {
-    console.error("Akasha fetch error:", err.message);
-    return [];
+    console.error("Akasha fetch error:", err.response?.status, err.message);
+    return null; // null = "failed", distinct from [] = "fetched but empty"
   }
 }
 
 // Just the avatarIds currently in the live in-game showcase
 async function getLiveShowcaseIds(uid) {
   try {
-    const response = await axios.get(`https://enka.network/api/uid/${uid}`, { headers: HEADERS, timeout: 15000 });
+    const response = await axios.get(`https://enka.network/api/uid/${uid}`, { headers: HEADERS, timeout: 8000 });
     const avatarList = response.data.avatarInfoList || [];
-    return new Set(avatarList.map(a => a.avatarId));
+    return { ids: new Set(avatarList.map(a => a.avatarId)), avatars: avatarList };
   } catch (err) {
     console.error("Enka showcase fetch error:", err.message);
-    return new Set();
+    return { ids: new Set(), avatars: [] };
   }
 }
 
-async function getShowcaseCharacters(uid) {
-  const cached = showcaseCache.get(uid);
-  if (cached && Date.now() - cached.fetchedAt < SHOWCASE_CACHE_TTL_MS) {
-    return cached.data;
-  }
-
-  const [akashaChars, liveIds] = await Promise.all([
+async function fetchAndMerge(uid) {
+  const [akashaChars, live] = await Promise.all([
     getAkashaCharacters(uid),
     getLiveShowcaseIds(uid)
   ]);
 
-  const merged = akashaChars.map(c => ({
-    name: c.name,
-    avatarId: c.avatarId,
-    isLive: liveIds.has(c.avatarId)
-  }));
+  if (akashaChars) {
+    // Akasha worked - full history, tagged with live status
+    return akashaChars.map(c => ({ name: c.name, avatarId: c.avatarId, isLive: live.ids.has(c.avatarId) }));
+  }
 
-  showcaseCache.set(uid, { data: merged, fetchedAt: Date.now() });
-  return merged;
+  // Akasha failed (e.g. 403) - degrade to just the live Enka showcase so autocomplete
+  // still works, resolving names via the local character data map.
+  return Promise.all(live.avatars.map(async (a) => {
+    const info = await getCharacterInfo(a.avatarId);
+    return { name: info?.name || "Unknown", avatarId: a.avatarId, isLive: true };
+  }));
+}
+
+// Stale-while-revalidate: serve cached data instantly (even if stale) and refresh
+// in the background, so autocomplete never blocks on a slow/failing API call and
+// risks missing Discord's 3s response window. Only blocks on a true cold start.
+async function getShowcaseCharacters(uid) {
+  const cached = showcaseCache.get(uid);
+
+  if (cached) {
+    if (Date.now() - cached.fetchedAt > SHOWCASE_CACHE_TTL_MS && !cached.refreshing) {
+      cached.refreshing = true;
+      fetchAndMerge(uid)
+        .then(data => showcaseCache.set(uid, { data, fetchedAt: Date.now(), refreshing: false }))
+        .catch(err => {
+          console.error("Background showcase refresh failed:", err.message);
+          cached.refreshing = false;
+        });
+    }
+    return cached.data;
+  }
+
+  // Cold start - nothing cached yet, have to wait for the real fetch
+  const data = await fetchAndMerge(uid);
+  showcaseCache.set(uid, { data, fetchedAt: Date.now(), refreshing: false });
+  return data;
 }
 
 async function fetchEnkaCard(uid, avatarId) {
