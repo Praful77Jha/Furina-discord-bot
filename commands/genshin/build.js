@@ -12,11 +12,9 @@ const AKASHA_HEADERS = {
   "Accept": "application/json",
   "Referer": "https://akasha.cv/"
 };
-// Akasha's API sits behind Cloudflare and 403s every server-side request,
-// so the user's Akasha history (20 chars, from their profile) is kept as a
-// static list instead of being fetched live.
-// Live status still comes from Enka, so newly showcased characters work
-// as long as their name is added here.
+// Fallback history (from the user's Akasha profile) for when Akasha's API
+// is unreachable - it answers Node but can 403 datacenter IPs.
+// Live status always comes from Enka.
 const AKASHA_HISTORY = [
   "Skirk", "Yelan", "Arlecchino", "Furina", "Hu Tao", "Kachina",
   "Flins", "Mualani", "Kamisato Ayato", "Xiao", "Columbina",
@@ -90,7 +88,7 @@ async function fetchAndMerge(uid) {
   }
 
   if (akashaChars) {
-    // Static history - full 20, tagged with live status
+    // Full history (live Akasha or static fallback), tagged with live status
     return akashaChars.map(c => {
       const liveId = liveByName.get(c.name.toLowerCase());
       return liveId !== undefined
@@ -219,13 +217,15 @@ module.exports = {
     try {
       const showcase = await getShowcaseCharacters(targetUid);
 
+      // Live showcase only - removed characters have no card to show
+      const liveOnly = showcase.filter(c => c.isLive);
       const filtered = focused
-        ? showcase.filter(c => c.name.toLowerCase().includes(focused.toLowerCase()))
-        : showcase;
+        ? liveOnly.filter(c => c.name.toLowerCase().includes(focused.toLowerCase()))
+        : liveOnly;
 
       await interaction.respond(
         filtered.slice(0, 25).map(c => ({
-          name: c.isLive ? c.name : `${c.name} (not showcased)`,
+          name: c.name,
           value: c.name
         }))
       );
