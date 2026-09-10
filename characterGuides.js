@@ -71,8 +71,55 @@ function normalize(name) {
   return String(name || "").toLowerCase().trim();
 }
 
+let AUTO_BUILDS = {};
+try {
+  AUTO_BUILDS = require("./characterGuides.auto").AUTO_BUILDS || {};
+} catch {}
+
+// Builds a full-shape guide from auto hub data (build + basic gear).
+// Tiers/teams/goals/priority stay null -> those views show "not added yet".
+function synthesize(auto) {
+  return {
+    name: auto.name,
+    element: null,
+    weapon: null,
+    rarity: null,
+    rating: null,
+    va: null,
+    tiers: null,
+    build: {
+      title: (auto.role ? auto.role + " Build" : "Best Build"),
+      weapon: auto.weapon,
+      altWeapons: auto.altWeapons || [],
+      artifact: auto.artifact,
+      altArtifacts: auto.altArtifacts || [],
+      mainStats: auto.mainStats || { sands: "", goblet: "", circlet: "" },
+      subStats: auto.subStats || []
+    },
+    teams: null,
+    statGoals: null,
+    talentPriority: null,
+    talentNote: "",
+    weapons: [
+      ...(auto.weapon ? [{ name: auto.weapon, tag: "Best", note: "" }] : []),
+      ...(auto.altWeapons || []).map(w => ({ name: w, tag: "Alternative", note: "" }))
+    ],
+    artifacts: [
+      ...(auto.artifact ? [{ name: auto.artifact, tag: "Best", note: "" }] : []),
+      ...(auto.altArtifacts || []).map(a => ({ name: a, tag: "Alternative", note: "" }))
+    ]
+  };
+}
+
 function getGuide(name) {
-  return GUIDES[normalize(name)] || null;
+  const q = normalize(name);
+  if (GUIDES[q]) return GUIDES[q];
+  if (AUTO_BUILDS[q]) return synthesize(AUTO_BUILDS[q]);
+  // Short names ("ayaka") vs full names ("kamisato ayaka"), either direction.
+  const keys = [...Object.keys(GUIDES), ...Object.keys(AUTO_BUILDS)];
+  const hit = keys.find(k => q.includes(k) || k.includes(q));
+  if (!hit) return null;
+  return GUIDES[hit] || synthesize(AUTO_BUILDS[hit]);
 }
 
 module.exports = { getGuide };

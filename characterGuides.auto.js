@@ -1,0 +1,2367 @@
+// Auto-generated from Game8 'All Best Builds' hub. DO NOT hand-edit - regenerate.
+// Covers build + basic gear lists for every character. Tiers/teams/goals/
+// priority stay hand-curated in characterGuides.js (Sandrone done).
+const AUTO_BUILDS = {
+  "aino": {
+    "name": "Aino",
+    "role": "Support",
+    "weapon": "Flame-Forged Insight",
+    "altWeapons": [],
+    "artifact": "Silken Moon's Serenade",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "CRIT/Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "albedo": {
+    "name": "Albedo",
+    "role": "Sub-DPS",
+    "weapon": "Uraku Misugiri",
+    "altWeapons": [],
+    "artifact": "Husk of Opulent Dreams",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "DEF%",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "alhaitham": {
+    "name": "Alhaitham",
+    "role": "DPS",
+    "weapon": "Light of Foliar Incision",
+    "altWeapons": [],
+    "artifact": "Gilded Dreams",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Dendro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "aloy": {
+    "name": "Aloy",
+    "role": "DPS",
+    "weapon": "Thundering Pulse",
+    "altWeapons": [],
+    "artifact": "Wanderer's Troupe",
+    "altArtifacts": [
+      "Blizzard Strayer x2"
+    ],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate"
+    ]
+  },
+  "amber": {
+    "name": "Amber",
+    "role": "DPS",
+    "weapon": "Astral Vulture's Crimson Plumage",
+    "altWeapons": [],
+    "artifact": "Wanderer's Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "arlecchino": {
+    "name": "Arlecchino",
+    "role": "DPS",
+    "weapon": "Crimson Moon's Semblance",
+    "altWeapons": [],
+    "artifact": "Fragment of Harmonic Whimsy",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "ayaka": {
+    "name": "Ayaka",
+    "role": "DPS",
+    "weapon": "Mistsplitter Reforged",
+    "altWeapons": [],
+    "artifact": "Blizzard Strayer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "Energy Recharge",
+      "ATK%",
+      "CRIT Rate"
+    ]
+  },
+  "ayato": {
+    "name": "Ayato",
+    "role": "DPS",
+    "weapon": "Haran Geppaku Futsu",
+    "altWeapons": [],
+    "artifact": "Echoes of an Offering",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate or CRIT DMG",
+      "ATK%",
+      "HP%"
+    ]
+  },
+  "baizhu": {
+    "name": "Baizhu",
+    "role": "Support",
+    "weapon": "",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP%",
+      "circlet": "HP%"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "HP%",
+      "HP"
+    ]
+  },
+  "barbara": {
+    "name": "Barbara",
+    "role": "Support",
+    "weapon": "Thrilling Tales of Dragon Slayers",
+    "altWeapons": [],
+    "artifact": "Ocean-Hued Clam",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "HP%",
+      "circlet": "HP% or Healing Bonus"
+    },
+    "subStats": [
+      "HP%"
+    ]
+  },
+  "beidou": {
+    "name": "Beidou",
+    "role": "Sub-DPS",
+    "weapon": "Wolf's Gravestone",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Electro DMG Bonus / ATK% / HP",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "bennett": {
+    "name": "Bennett",
+    "role": "Buffer",
+    "weapon": "Mistsplitter Reforged",
+    "altWeapons": [
+      "Skyward Blade"
+    ],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "candace": {
+    "name": "Candace",
+    "role": "Sub-DPS",
+    "weapon": "The Catch",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or HP%",
+      "goblet": "HP% or Hydro DMG Bonus",
+      "circlet": "HP%, CRIT Rate, or CRIT DMG"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge",
+      "CRIT Rate",
+      "Crit DMG",
+      "Elemental Mastery"
+    ]
+  },
+  "charlotte": {
+    "name": "Charlotte",
+    "role": "Sub-DPS",
+    "weapon": "Kagura's Verity",
+    "altWeapons": [],
+    "artifact": "Golden Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK% or Cryo DMG Bonus",
+      "circlet": "CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "ATK%",
+      "Energy Recharge",
+      "CRIT Rate"
+    ]
+  },
+  "chasca": {
+    "name": "Chasca",
+    "role": "DPS",
+    "weapon": "Astral Vulture's Crimson Plumage",
+    "altWeapons": [],
+    "artifact": "Obsidian Codex",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "ATK% or Element DMG Bonus",
+      "circlet": "CRIT DMG or Crit Rate"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "chevreuse": {
+    "name": "Chevreuse",
+    "role": "Overload Support",
+    "weapon": "Black Tassel",
+    "altWeapons": [
+      "Favonius Lance"
+    ],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [
+      "Crimson Witch of Flames x4"
+    ],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP%",
+      "circlet": "HP% or Healing Bonus%"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge"
+    ]
+  },
+  "chiori": {
+    "name": "Chiori",
+    "role": "Sub-DPS",
+    "weapon": "Uraku Misugiri",
+    "altWeapons": [],
+    "artifact": "Golden Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF% or ATK%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "DEF%",
+      "ATK%"
+    ]
+  },
+  "chongyun": {
+    "name": "Chongyun",
+    "role": "Sub-DPS",
+    "weapon": "Wolf's Gravestone",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "citlali": {
+    "name": "Citlali",
+    "role": "Shielder",
+    "weapon": "Starcaller's Watch",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge"
+    ]
+  },
+  "clorinde": {
+    "name": "Clorinde",
+    "role": "DPS",
+    "weapon": "Absolution",
+    "altWeapons": [],
+    "artifact": "Fragment of Harmonic Whimsy",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "collei": {
+    "name": "Collei",
+    "role": "Sub-DPS",
+    "weapon": "Elegy for the End",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge, ATK%, or Elemental Mastery",
+      "goblet": "Dendro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "columbina": {
+    "name": "Columbina",
+    "role": "Lunar Sub-DPS",
+    "weapon": "Nocturne's Curtain Call",
+    "altWeapons": [],
+    "artifact": "Aubade of Morningstar and Moon",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP% or Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Elemental Mastery"
+    ]
+  },
+  "cyno": {
+    "name": "Cyno",
+    "role": "Stellar-Conduct DPS",
+    "weapon": "Staff of the Scarlet Sands",
+    "altWeapons": [],
+    "artifact": "Disenchantment in Deep Shadows",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "Crit Rate/Crit DMG",
+      "Elemental Mastery",
+      "ATK%"
+    ]
+  },
+  "dahlia": {
+    "name": "Dahlia",
+    "role": "Shielder",
+    "weapon": "Favonius Sword",
+    "altWeapons": [],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP%",
+      "circlet": "HP% or CRIT Rate"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "HP%"
+    ]
+  },
+  "dehya": {
+    "name": "Dehya",
+    "role": "Sub-DPS",
+    "weapon": "Favonius Greatsword",
+    "altWeapons": [
+      "Beacon of the Reed Sea"
+    ],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [
+      "Marechaussee Hunter x4"
+    ],
+    "mainStats": {
+      "sands": "HP% or Elemental Mastery",
+      "goblet": "HP% or Elemental Mastery",
+      "circlet": "HP% or Elemental Mastery"
+    },
+    "subStats": [
+      "HP%",
+      "Elemental Mastery"
+    ]
+  },
+  "diluc": {
+    "name": "Diluc",
+    "role": "DPS",
+    "weapon": "Redhorn Stonethresher",
+    "altWeapons": [],
+    "artifact": "Crimson Witch of Flames",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate / CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "diona": {
+    "name": "Diona",
+    "role": "Support",
+    "weapon": "Sacrificial Bow",
+    "altWeapons": [],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or HP%",
+      "goblet": "HP%",
+      "circlet": "Healing Bonus or HP%"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "HP%",
+      "HP"
+    ]
+  },
+  "dori": {
+    "name": "Dori",
+    "role": "Support",
+    "weapon": "Favonius Greatsword",
+    "altWeapons": [],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or HP%",
+      "goblet": "HP%",
+      "circlet": "HP% or Healing Bonus%"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "HP%",
+      "ATK%",
+      "CRIT Rate"
+    ]
+  },
+  "durin": {
+    "name": "Durin",
+    "role": "Hexerei Sub-DPS",
+    "weapon": "Athame Artis",
+    "altWeapons": [
+      "Freedom-Sworn"
+    ],
+    "artifact": "A Day Carved from Rising Winds",
+    "altArtifacts": [
+      "Flower of Paradise Lost x4"
+    ],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "ATK% or Pyro DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "ATK%",
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "emilie": {
+    "name": "Emilie",
+    "role": "Sub-DPS",
+    "weapon": "Lumidouce Elegy",
+    "altWeapons": [],
+    "artifact": "Unfinished Reverie",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Dendro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "escoffier": {
+    "name": "Escoffier",
+    "role": "Sub-DPS",
+    "weapon": "Symphonist of Scents",
+    "altWeapons": [],
+    "artifact": "Golden Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Cryo DMG Bonus or ATK%",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Energy Recharge"
+    ]
+  },
+  "eula": {
+    "name": "Eula",
+    "role": "DPS",
+    "weapon": "Song of Broken Pines",
+    "altWeapons": [],
+    "artifact": "Pale Flame",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Physical DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%"
+    ]
+  },
+  "faruzan": {
+    "name": "Faruzan",
+    "role": "Anemo Buffer",
+    "weapon": "Elegy for the End",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge",
+      "goblet": "Anemo DMG Bonus",
+      "circlet": "CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "fischl": {
+    "name": "Fischl",
+    "role": "Electro",
+    "weapon": "Polar Star",
+    "altWeapons": [],
+    "artifact": "Golden Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK"
+    ]
+  },
+  "flins": {
+    "name": "Flins",
+    "role": "Lunar-Charged DPS",
+    "weapon": "Bloodsoaked Ruins",
+    "altWeapons": [],
+    "artifact": "Night of the Sky's Unveiling",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "ATK%",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "freminet": {
+    "name": "Freminet",
+    "role": "Physical",
+    "weapon": "Song of Broken Pines",
+    "altWeapons": [
+      "Wolf's Gravestone"
+    ],
+    "artifact": "Pale Flame",
+    "altArtifacts": [
+      "Blizzard Strayer x4"
+    ],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Physical DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "furina": {
+    "name": "Furina",
+    "role": "Sub-DPS",
+    "weapon": "Splendor of Tranquil Waters",
+    "altWeapons": [],
+    "artifact": "Golden Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP% or Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "HP%",
+      "Elemental Mastery"
+    ]
+  },
+  "gaming": {
+    "name": "Gaming",
+    "role": "DPS",
+    "weapon": "Serpent Spine",
+    "altWeapons": [],
+    "artifact": "Marechaussee Hunter",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery or ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "Energy Recharge",
+      "Elemental Mastery",
+      "CRIT Rate",
+      "ATK%"
+    ]
+  },
+  "ganyu": {
+    "name": "Ganyu",
+    "role": "Freeze",
+    "weapon": "The First Great Magic",
+    "altWeapons": [
+      "Astral Vulture's Crimson Plumage"
+    ],
+    "artifact": "Blizzard Strayer",
+    "altArtifacts": [
+      "Unfinished Reverie x4"
+    ],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT DMG",
+      "CRIT Rate",
+      "Elemental Mastery"
+    ]
+  },
+  "gorou": {
+    "name": "Gorou",
+    "role": "Geo Buffer",
+    "weapon": "Elegy for the End",
+    "altWeapons": [],
+    "artifact": "Husk of Opulent Dreams",
+    "altArtifacts": [
+      "Emblem of Severed Fate x2"
+    ],
+    "mainStats": {
+      "sands": "DEF% or Energy Recharge",
+      "goblet": "DEF or Geo DMG Bonus",
+      "circlet": "DEF%"
+    },
+    "subStats": [
+      "DEF%",
+      "Energy Recharge",
+      "CRIT Rate"
+    ]
+  },
+  "heizou": {
+    "name": "Heizou",
+    "role": "Swirl",
+    "weapon": "A Thousand Floating Dreams",
+    "altWeapons": [
+      "Tulaytullah's Remembrance"
+    ],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "hu tao": {
+    "name": "Hu Tao",
+    "role": "DPS",
+    "weapon": "Staff of Homa",
+    "altWeapons": [],
+    "artifact": "Crimson Witch of Flames",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "HP%",
+      "Elemental Mastery"
+    ]
+  },
+  "iansan": {
+    "name": "Iansan",
+    "role": "Buffer",
+    "weapon": "Symphonist of Scents",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK%",
+      "circlet": "ATK%"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "ifa": {
+    "name": "Ifa",
+    "role": "Swirl",
+    "weapon": "Sunny Morning Sleep-In",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge"
+    ]
+  },
+  "illuga": {
+    "name": "Illuga",
+    "role": "Lunar-Crystallize Support",
+    "weapon": "Favonius Lance",
+    "altWeapons": [],
+    "artifact": "Silken Moon's Serenade",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge",
+      "DEF%"
+    ]
+  },
+  "ineffa": {
+    "name": "Ineffa",
+    "role": "Sub-DPS",
+    "weapon": "Fractured Halo",
+    "altWeapons": [],
+    "artifact": "Aubade of Morningstar and Moon",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "ATK% or Elemental Mastery",
+      "circlet": "CRIT Rate or Crit DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Elemental Mastery",
+      "Energy Recharge"
+    ]
+  },
+  "itto": {
+    "name": "Itto",
+    "role": "DPS",
+    "weapon": "Redhorn Stonethresher",
+    "altWeapons": [],
+    "artifact": "Husk of Opulent Dreams",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "DEF%",
+      "CRIT DMG",
+      "CRIT Rate",
+      "Energy Recharge"
+    ]
+  },
+  "jahoda": {
+    "name": "Jahoda",
+    "role": "Anemo Support",
+    "weapon": "Elegy for the End",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or ATK%",
+      "goblet": "ATK%",
+      "circlet": "ATK%, Healing Bonus, or CRIT Rate"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "ATK",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Elemental Mastery"
+    ]
+  },
+  "jean": {
+    "name": "Jean",
+    "role": "Support",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Anemo DMG Bonus",
+      "circlet": "CRIT Rate or Healing Bonus"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "kachina": {
+    "name": "Kachina",
+    "role": "Sub-DPS",
+    "weapon": "Footprint of the Rainbow",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "DEF%",
+      "Energy Recharge"
+    ]
+  },
+  "kaeya": {
+    "name": "Kaeya",
+    "role": "DPS",
+    "weapon": "Mistsplitter Reforged",
+    "altWeapons": [],
+    "artifact": "Blizzard Strayer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT DMG",
+      "CRIT Rate"
+    ]
+  },
+  "kaveh": {
+    "name": "Kaveh",
+    "role": "Bloom",
+    "weapon": "Favonius Greatsword",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "kazuha": {
+    "name": "Kazuha",
+    "role": "Sub-DPS",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery or ATK%",
+      "goblet": "Elemental Mastery or Anemo DMG Bonus",
+      "circlet": "Elemental Mastery or CRIT Rate / CRIT DMG"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%"
+    ]
+  },
+  "keqing": {
+    "name": "Keqing",
+    "role": "Aggravate",
+    "weapon": "Mistsplitter Reforged",
+    "altWeapons": [],
+    "artifact": "Thundering Fury",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "kinich": {
+    "name": "Kinich",
+    "role": "DPS",
+    "weapon": "Fang of the Mountain King",
+    "altWeapons": [],
+    "artifact": "Obsidian Codex",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Dendro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "kirara": {
+    "name": "Kirara",
+    "role": "Shielder",
+    "weapon": "Key of Khaj-Nisut",
+    "altWeapons": [],
+    "artifact": "Tenacity of the Millelith",
+    "altArtifacts": [
+      "Vourukasha's Glow x2"
+    ],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP%",
+      "circlet": "HP%"
+    },
+    "subStats": [
+      "HP%",
+      "HP",
+      "Energy Recharge"
+    ]
+  },
+  "klee": {
+    "name": "Klee",
+    "role": "DPS",
+    "weapon": "Lost Prayer to the Sacred Winds",
+    "altWeapons": [],
+    "artifact": "A Day Carved from Rising Winds",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "kokomi": {
+    "name": "Kokomi",
+    "role": "Support",
+    "weapon": "Everlasting Moonglow",
+    "altWeapons": [],
+    "artifact": "Ocean-Hued Clam",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "Healing Bonus or HP%"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "lan yan": {
+    "name": "Lan Yan",
+    "role": "Shielder",
+    "weapon": "Memory of Dust",
+    "altWeapons": [
+      "Starcaller's Watch"
+    ],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK%",
+      "circlet": "ATK%"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "lauma": {
+    "name": "Lauma",
+    "role": "Support",
+    "weapon": "Nightweaver's Looking Glass",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery or CRIT Rate/DMG"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "layla": {
+    "name": "Layla",
+    "role": "Shielder",
+    "weapon": "Key of Khaj-Nisut",
+    "altWeapons": [],
+    "artifact": "Tenacity of the Millelith",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "HP% or Cryo DMG Bonus",
+      "circlet": "HP% or CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "HP%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "linnea": {
+    "name": "Linnea",
+    "role": "Lunar-Crystallize Sub-DPS",
+    "weapon": "Golden Frostbound Oath",
+    "altWeapons": [],
+    "artifact": "Aubade of Morningstar and Moon",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF%",
+      "goblet": "DEF%",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "DEF%",
+      "Elemental Mastery",
+      "Energy Recharge"
+    ]
+  },
+  "lisa": {
+    "name": "Lisa",
+    "role": "Sub-DPS",
+    "weapon": "Kagura's Verity",
+    "altWeapons": [],
+    "artifact": "Gilded Dreams",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Electro DMG Bonus or Elemental Mastery",
+      "circlet": "CRIT Rate/CRIT DMG or Elemental Mastery"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "lohen": {
+    "name": "Lohen",
+    "role": "Hexerei DPS",
+    "weapon": "Disaster and Remorse",
+    "altWeapons": [],
+    "artifact": "A Day Carved from Rising Winds",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Energy Recharge"
+    ]
+  },
+  "lynette": {
+    "name": "Lynette",
+    "role": "Swirl",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery or Energy Recharge",
+      "goblet": "Elemental Mastery or Anemo DMG Bonus",
+      "circlet": "Elemental Mastery or CRIT Rate/DMG"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "lyney": {
+    "name": "Lyney",
+    "role": "DPS",
+    "weapon": "The First Great Magic",
+    "altWeapons": [],
+    "artifact": "Marechaussee Hunter",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "Energy Recharge",
+      "CRIT Rate",
+      "ATK%"
+    ]
+  },
+  "mavuika": {
+    "name": "Mavuika",
+    "role": "DPS",
+    "weapon": "A Thousand Blazing Suns",
+    "altWeapons": [],
+    "artifact": "Obsidian Codex",
+    "altArtifacts": [
+      "Scroll of the Hero of Cinder City x4"
+    ],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "mika": {
+    "name": "Mika",
+    "role": "Support",
+    "weapon": "Favonius Lance",
+    "altWeapons": [],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or HP%",
+      "goblet": "HP%",
+      "circlet": "HP%, Healing Bonus, or CRIT Rate"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "HP%",
+      "Crit Rate"
+    ]
+  },
+  "mizuki": {
+    "name": "Mizuki",
+    "role": "Swirl",
+    "weapon": "Sunny Morning Sleep-In",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery or Energy Recharge",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge"
+    ]
+  },
+  "mona": {
+    "name": "Mona",
+    "role": "Sub-DPS",
+    "weapon": "Skyward Atlas",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%"
+    ]
+  },
+  "mualani": {
+    "name": "Mualani",
+    "role": "DPS",
+    "weapon": "Surf's Up",
+    "altWeapons": [],
+    "artifact": "Obsidian Codex",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP% or Elemental Mastery",
+      "goblet": "Hydro DMG Bonus or HP%",
+      "circlet": "CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "HP%",
+      "Elemental Mastery",
+      "CRIT Rate",
+      "Energy Recharge"
+    ]
+  },
+  "nahida": {
+    "name": "Nahida",
+    "role": "Sub-DPS",
+    "weapon": "A Thousand Floating Dreams",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery or Dendro DMG Bonus",
+      "circlet": "Elemental Mastery or CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "navia": {
+    "name": "Navia",
+    "role": "DPS",
+    "weapon": "Verdict",
+    "altWeapons": [],
+    "artifact": "Nighttime Whispers in the Echoing Woods",
+    "altArtifacts": [
+      "Golden Troupe x2",
+      "Archaic Petra x2"
+    ],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "nefer": {
+    "name": "Nefer",
+    "role": "Lunar-Bloom DPS",
+    "weapon": "Reliquary of Truth",
+    "altWeapons": [],
+    "artifact": "Obsidian Codex",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "neuvillette": {
+    "name": "Neuvillette",
+    "role": "DPS",
+    "weapon": "Tome of the Eternal Flow",
+    "altWeapons": [],
+    "artifact": "Marechaussee Hunter",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "Hydro DMG Bonus or HP%",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "HP%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "nicole": {
+    "name": "Nicole",
+    "role": "Hexerei Support",
+    "weapon": "Angelos' Heptades",
+    "altWeapons": [],
+    "artifact": "Celestial Gift",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK%",
+      "circlet": "ATK%"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge"
+    ]
+  },
+  "nilou": {
+    "name": "Nilou",
+    "role": "Bloom",
+    "weapon": "Key of Khaj-Nisut",
+    "altWeapons": [],
+    "artifact": "Tenacity of the Millelith",
+    "altArtifacts": [
+      "Vourukasha's Glow x2"
+    ],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "HP%",
+      "circlet": "HP%"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge",
+      "Flat HP",
+      "Elemental Mastery"
+    ]
+  },
+  "ningguang": {
+    "name": "Ningguang",
+    "role": "DPS",
+    "weapon": "Lost Prayer to the Sacred Winds",
+    "altWeapons": [],
+    "artifact": "Nighttime Whispers in the Echoing Woods",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "noelle": {
+    "name": "Noelle",
+    "role": "DPS",
+    "weapon": "Redhorn Stonethresher",
+    "altWeapons": [
+      "Skyward Pride"
+    ],
+    "artifact": "Marechaussee Hunter",
+    "altArtifacts": [
+      "Archaic Petra x4"
+    ],
+    "mainStats": {
+      "sands": "DEF%",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "DEF%",
+      "CRIT DMG",
+      "CRIT Rate%",
+      "ATK%"
+    ]
+  },
+  "ororon": {
+    "name": "Ororon",
+    "role": "Sub-DPS",
+    "weapon": "Elegy for the End",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT DMG or Crit Rate"
+    },
+    "subStats": [
+      "ATK",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "prune": {
+    "name": "Prune",
+    "role": "Hexerei Sub-DPS",
+    "weapon": "Skyward Atlas",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK%",
+      "circlet": "ATK%"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge"
+    ]
+  },
+  "qiqi": {
+    "name": "Qiqi",
+    "role": "Stellar-Conduct Support",
+    "weapon": "Skyward Blade",
+    "altWeapons": [],
+    "artifact": "Disenchantment in Deep Shadows",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK%",
+      "circlet": "ATK% or Healing Bonus"
+    },
+    "subStats": [
+      "ATK%",
+      "ATK",
+      "Energy Recharge"
+    ]
+  },
+  "raiden": {
+    "name": "Raiden",
+    "role": "DPS",
+    "weapon": "Engulfing Lightning",
+    "altWeapons": [
+      "Dragon's Bane"
+    ],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [
+      "Flower of Paradise Lost x4"
+    ],
+    "mainStats": {
+      "sands": "Energy Recharge or ATK%",
+      "goblet": "ATK% or Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "razor": {
+    "name": "Razor",
+    "role": "Electro",
+    "weapon": "A Thousand Blazing Suns",
+    "altWeapons": [],
+    "artifact": "A Day Carved from Rising Winds",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "rosaria": {
+    "name": "Rosaria",
+    "role": "Melt DPS",
+    "weapon": "Staff of the Scarlet Sands",
+    "altWeapons": [
+      "Staff of Homa"
+    ],
+    "artifact": "Unfinished Reverie",
+    "altArtifacts": [
+      "Blizzard Strayer x4"
+    ],
+    "mainStats": {
+      "sands": "Elemental Mastery or ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Elemental Mastery"
+    ]
+  },
+  "sandrone": {
+    "name": "Sandrone",
+    "role": "Stellar-Conduct DPS",
+    "weapon": "A Teaspoon of Transcendence",
+    "altWeapons": [],
+    "artifact": "Disenchantment in Deep Shadows",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "ATK%",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "sara": {
+    "name": "Sara",
+    "role": "Sub-DPS",
+    "weapon": "Elegy for the End",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or ATK%",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "sayu": {
+    "name": "Sayu",
+    "role": "Swirl",
+    "weapon": "Makhaira Aquamarine",
+    "altWeapons": [
+      "Wolf's Gravestone"
+    ],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "sethos": {
+    "name": "Sethos",
+    "role": "DPS",
+    "weapon": "Hunter's Path",
+    "altWeapons": [],
+    "artifact": "Wanderer's Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "shenhe": {
+    "name": "Shenhe",
+    "role": "Cryo Buffer",
+    "weapon": "Calamity Queller",
+    "altWeapons": [],
+    "artifact": "Gladiator's Finale",
+    "altArtifacts": [
+      "Shimenawa's Reminiscence x2"
+    ],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "ATK%",
+      "circlet": "ATK%"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge"
+    ]
+  },
+  "shinobu": {
+    "name": "Shinobu",
+    "role": "Hyperbloom",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Flower of Paradise Lost",
+    "altArtifacts": [
+      "Tenacity of the Millelith x4"
+    ],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "HP%",
+      "Energy Recharge"
+    ]
+  },
+  "sigewinne": {
+    "name": "Sigewinne",
+    "role": "Support",
+    "weapon": "Silvershower Heartstrings",
+    "altWeapons": [],
+    "artifact": "Song of Days Past",
+    "altArtifacts": [
+      "Emblem of Severed Fate x4"
+    ],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "HP%",
+      "circlet": "HP% or Healing Bonus"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge"
+    ]
+  },
+  "skirk": {
+    "name": "Skirk",
+    "role": "DPS",
+    "weapon": "Azurelight",
+    "altWeapons": [],
+    "artifact": "Finale of the Deep Galleries",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "sucrose": {
+    "name": "Sucrose",
+    "role": "Swirl Support",
+    "weapon": "Sunny Morning Sleep-In",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery",
+      "goblet": "Elemental Mastery",
+      "circlet": "Elemental Mastery"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "Elemental Mastery",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "tartaglia": {
+    "name": "Tartaglia",
+    "role": "DPS",
+    "weapon": "Polar Star",
+    "altWeapons": [],
+    "artifact": "Nymph's Dream",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Elemental Mastery"
+    ]
+  },
+  "thoma": {
+    "name": "Thoma",
+    "role": "Shielder",
+    "weapon": "Favonius Lance",
+    "altWeapons": [
+      "Kitain Cross Spear"
+    ],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [
+      "Flower of Paradise Lost x4"
+    ],
+    "mainStats": {
+      "sands": "Energy Recharge",
+      "goblet": "HP%",
+      "circlet": "HP% or CRIT Rate"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "HP%"
+    ]
+  },
+  "tighnari": {
+    "name": "Tighnari",
+    "role": "DPS",
+    "weapon": "Hunter's Path",
+    "altWeapons": [],
+    "artifact": "Wanderer's Troupe",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Elemental Mastery",
+      "goblet": "Dendro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "traveler (anemo)": {
+    "name": "Traveler (Anemo)",
+    "role": "Sub-DPS",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge",
+      "goblet": "Anemo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate"
+    ]
+  },
+  "traveler (dendro)": {
+    "name": "Traveler (Dendro)",
+    "role": "Sub-DPS",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge% or Elemental Mastery",
+      "goblet": "Dendro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "Elemental Mastery",
+      "Crit Rate",
+      "Crit DMG"
+    ]
+  },
+  "traveler (electro)": {
+    "name": "Traveler (Electro)",
+    "role": "Sub-DPS",
+    "weapon": "Skyward Blade",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT DMG",
+      "CRIT Rate",
+      "Energy Recharge"
+    ]
+  },
+  "traveler (geo)": {
+    "name": "Traveler (Geo)",
+    "role": "Sub-DPS",
+    "weapon": "Primordial Jade Cutter",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Geo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "traveler (hydro)": {
+    "name": "Traveler (Hydro)",
+    "role": "Sub-DPS",
+    "weapon": "Freedom-Sworn",
+    "altWeapons": [],
+    "artifact": "Noblesse Oblige",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "Elemental Mastery",
+      "Energy Recharge",
+      "ATK% or HP%"
+    ]
+  },
+  "traveler (pyro)": {
+    "name": "Traveler (Pyro)",
+    "role": "Sub-DPS",
+    "weapon": "Mistsplitter Reforged",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Pyro DMG Bonus or ATK%",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "varesa": {
+    "name": "Varesa",
+    "role": "DPS",
+    "weapon": "Vivid Notions",
+    "altWeapons": [],
+    "artifact": "Long Night's Oath",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "varka": {
+    "name": "Varka",
+    "role": "Hexerei DPS",
+    "weapon": "Gest of the Mighty Wolf",
+    "altWeapons": [],
+    "artifact": "A Day Carved from Rising Winds",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "ATK%",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "venti": {
+    "name": "Venti",
+    "role": "Main DPS",
+    "weapon": "The Daybreak Chronicles",
+    "altWeapons": [
+      "Elegy for the End"
+    ],
+    "artifact": "A Day Carved from Rising Winds",
+    "altArtifacts": [
+      "Viridescent Venerer x4"
+    ],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Anemo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Elemental Mastery",
+      "Energy Recharge",
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "wanderer": {
+    "name": "Wanderer",
+    "role": "DPS",
+    "weapon": "Tulaytullah's Remembrance",
+    "altWeapons": [],
+    "artifact": "Desert Pavilion Chronicle",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Anemo DMG Bonus",
+      "circlet": "CRIT Rate/CRIT DMG"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "wriothesley": {
+    "name": "Wriothesley",
+    "role": "DPS",
+    "weapon": "Cashflow Supervision",
+    "altWeapons": [],
+    "artifact": "Marechaussee Hunter",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Cryo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge",
+      "Elemental Mastery"
+    ]
+  },
+  "xiangling": {
+    "name": "Xiangling",
+    "role": "Sub-DPS",
+    "weapon": "Staff of the Scarlet Sands",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Elemental Mastery or ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "xianyun": {
+    "name": "Xianyun",
+    "role": "Support",
+    "weapon": "Crane's Echoing Call",
+    "altWeapons": [],
+    "artifact": "Viridescent Venerer",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or ATK%",
+      "goblet": "ATK%",
+      "circlet": "ATK% or Healing Bonus%"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "ATK%"
+    ]
+  },
+  "xiao": {
+    "name": "Xiao",
+    "role": "DPS",
+    "weapon": "Primordial Jade Winged-Spear",
+    "altWeapons": [],
+    "artifact": "Long Night's Oath",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Anemo DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG"
+    ]
+  },
+  "xilonen": {
+    "name": "Xilonen",
+    "role": "Support",
+    "weapon": "Peak Patrol Song",
+    "altWeapons": [],
+    "artifact": "Scroll of the Hero of Cinder City",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge",
+      "goblet": "DEF%",
+      "circlet": "Healing Bonus or DEF%"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "DEF%"
+    ]
+  },
+  "xingqiu": {
+    "name": "Xingqiu",
+    "role": "Sub-DPS",
+    "weapon": "Sacrificial Sword",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate",
+      "ATK%",
+      "Elemental Mastery"
+    ]
+  },
+  "xinyan": {
+    "name": "Xinyan",
+    "role": "Physical",
+    "weapon": "Redhorn Stonethresher",
+    "altWeapons": [],
+    "artifact": "Pale Flame",
+    "altArtifacts": [
+      "Bloodstained Chivalry x2",
+      "Marechaussee Hunter x4"
+    ],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Physical DMG Bonus or ATK%",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK",
+      "CRIT DMG"
+    ]
+  },
+  "yae miko": {
+    "name": "Yae Miko",
+    "role": "Stellar-Conduct Sub-DPS",
+    "weapon": "Kagura's Verity",
+    "altWeapons": [],
+    "artifact": "Disenchantment in Deep Shadows",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK% or Energy Recharge",
+      "goblet": "Electro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate",
+      "CRIT DMG",
+      "ATK%"
+    ]
+  },
+  "yanfei": {
+    "name": "Yanfei",
+    "role": "DPS",
+    "weapon": "Lost Prayer to the Sacred Winds",
+    "altWeapons": [],
+    "artifact": "Crimson Witch of Flames",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "ATK%",
+      "CRIT DMG",
+      "CRIT Rate"
+    ]
+  },
+  "yaoyao": {
+    "name": "Yaoyao",
+    "role": "Support",
+    "weapon": "Favonius Lance",
+    "altWeapons": [],
+    "artifact": "Deepwood Memories",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "Energy Recharge or HP%",
+      "goblet": "HP%",
+      "circlet": "CRIT Rate or Healing Bonus"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT Rate / DMG",
+      "Elemental Mastery",
+      "HP%"
+    ]
+  },
+  "yelan": {
+    "name": "Yelan",
+    "role": "Sub-DPS",
+    "weapon": "Aqua Simulacra",
+    "altWeapons": [],
+    "artifact": "Emblem of Severed Fate",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "HP% or Energy Recharge",
+      "goblet": "Hydro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "HP%",
+      "CRIT Rate",
+      "CRIT DMG",
+      "Energy Recharge"
+    ]
+  },
+  "yoimiya": {
+    "name": "Yoimiya",
+    "role": "DPS",
+    "weapon": "Thundering Pulse",
+    "altWeapons": [],
+    "artifact": "Shimenawa's Reminiscence",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "ATK%",
+      "goblet": "Pyro DMG Bonus",
+      "circlet": "CRIT Rate or CRIT DMG"
+    },
+    "subStats": [
+      "Energy Recharge",
+      "CRIT DMG",
+      "CRIT Rate. ATK%"
+    ]
+  },
+  "yun jin": {
+    "name": "Yun Jin",
+    "role": "Buffer",
+    "weapon": "Engulfing Lightning",
+    "altWeapons": [],
+    "artifact": "Husk of Opulent Dreams",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF% or Energy Recharge",
+      "goblet": "DEF%",
+      "circlet": "DEF% or Crit Rate"
+    },
+    "subStats": [
+      "DEF%",
+      "Energy Recharge",
+      "Crit Rate"
+    ]
+  },
+  "zhongli": {
+    "name": "Zhongli",
+    "role": "Shielder",
+    "weapon": "Black Tassel",
+    "altWeapons": [
+      "Staff of Homa"
+    ],
+    "artifact": "Tenacity of the Millelith",
+    "altArtifacts": [
+      "Noblesse Oblige x2",
+      "Archaic Petra x2"
+    ],
+    "mainStats": {
+      "sands": "HP%",
+      "goblet": "HP%",
+      "circlet": "HP%"
+    },
+    "subStats": [
+      "HP%",
+      "Energy Recharge"
+    ]
+  },
+  "zibai": {
+    "name": "Zibai",
+    "role": "Lunar-Crystallize DPS",
+    "weapon": "Lightbearing Moonshard",
+    "altWeapons": [],
+    "artifact": "Obsidian Codex",
+    "altArtifacts": [],
+    "mainStats": {
+      "sands": "DEF%",
+      "goblet": "DEF%",
+      "circlet": "CRIT DMG or CRIT Rate"
+    },
+    "subStats": [
+      "CRIT Rate",
+      "CRIT DMG",
+      "DEF%",
+      "Elemental Mastery",
+      "Energy Recharge"
+    ]
+  }
+};
+
+module.exports = { AUTO_BUILDS };
