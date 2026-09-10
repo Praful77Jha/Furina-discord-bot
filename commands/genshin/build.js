@@ -140,14 +140,23 @@ async function getShowcaseCharacters(uid) {
   return data;
 }
 
-async function fetchEnkaCard(uid, avatarId) {
+async function fetchEnkaCard(uid, avatarId, retries = 1) {
   const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
-  const response = await axios.get(url, {
-    responseType: "arraybuffer",
-    timeout: 15000,
-    headers: HEADERS
-  });
-  return Buffer.from(response.data);
+  try {
+    const response = await axios.get(url, {
+      responseType: "arraybuffer",
+      timeout: 45000,
+      headers: HEADERS
+    });
+    return Buffer.from(response.data);
+  } catch (err) {
+    const status = err.response?.status;
+    if (retries > 0 && (!status || status >= 500 || status === 429)) {
+      await new Promise(r => setTimeout(r, 3000));
+      return fetchEnkaCard(uid, avatarId, retries - 1);
+    }
+    throw err;
+  }
 }
 
 module.exports = {

@@ -17,6 +17,7 @@ const NEW_CHARACTERS = {
   "10000130": { name: "Lauma", element: "Dendro", weaponType: "CATALYST" },
   "10000131": { name: "Durin", element: "Cryo", weaponType: "CLAYMORE" },
   "10000132": { name: "Varka", element: "Cryo", weaponType: "CLAYMORE" },
+  "10000133": { name: "Sandrone", element: "Cryo", weaponType: "CLAYMORE" },
 };
 
 async function loadCharacterData() {
