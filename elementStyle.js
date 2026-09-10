@@ -12,7 +12,14 @@ const ELEMENT_STYLE = {
 };
 
 function getElementStyle(elementRaw) {
-  return ELEMENT_STYLE[elementRaw] || ELEMENT_STYLE.Unknown;
+  if (!elementRaw) return ELEMENT_STYLE.Unknown;
+  if (ELEMENT_STYLE[elementRaw]) return ELEMENT_STYLE[elementRaw];
+  // Accept standard names too (guide data and API fallbacks use these).
+  const alias = {
+    pyro: "Fire", hydro: "Water", anemo: "Wind", electro: "Electric",
+    dendro: "Grass", cryo: "Ice", geo: "Rock"
+  };
+  return ELEMENT_STYLE[alias[String(elementRaw).toLowerCase()]] || ELEMENT_STYLE.Unknown;
 }
 
 module.exports = { getElementStyle };

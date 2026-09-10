@@ -70,6 +70,16 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
 
+  // /character guide section menu
+  if (interaction.isStringSelectMenu() && interaction.customId === 'select_character_view') {
+    try {
+      await client.commands.get('character').handleViewSelect(interaction);
+    } catch (error) {
+      console.error('Character view handler error:', error);
+    }
+    return;
+  }
+
   // /codes "mark claimed" buttons — customId: codeclaim_{uid}_{code}
   if (interaction.isButton() && interaction.customId.startsWith('codeclaim_')) {
     try {
