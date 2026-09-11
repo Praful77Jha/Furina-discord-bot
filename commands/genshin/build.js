@@ -183,27 +183,32 @@ async function getAkashaRanks(uid, avatarId, name) {
   }
 }
 
-// Draws rank pills onto the top-left of the Enka card. Text only, no emoji
-// (host canvas has no emoji font).
+// Draws rank pills into the empty strip bottom-left of the Enka card
+// (above the UID line, clear of name/constellations/artifacts).
+// Plain sans, card-matched size - host canvas has no display font.
 async function overlayRanks(cardBuffer, ranks) {
   const img = await loadImage(cardBuffer);
   const canvas = createCanvas(img.width, img.height);
   const ctx = canvas.getContext("2d");
   ctx.drawImage(img, 0, 0, img.width, img.height);
-  const pad = Math.max(24, Math.round(img.width * 0.02));
-  ctx.font = `bold ${Math.max(22, Math.round(img.width * 0.018))}px sans-serif`;
+  const lines = ranks.slice(0, 2).map(r => `TOP ${r.pct}%  ${[r.short, r.variant].filter(Boolean).join("  ·  ")}`);
+  const fontSize = Math.max(17, Math.round(img.width * 0.014));
+  ctx.font = `600 ${fontSize}px sans-serif`;
   ctx.textAlign = "left";
-  let y = pad + 10;
-  for (const r of ranks.slice(0, 2)) {
-    const text = `TOP ${r.pct}%  ${[r.short, r.variant].filter(Boolean).join("  ·  ")}`;
-    const w = ctx.measureText(text).width + 44;
-    const h = Math.max(44, Math.round(img.height * 0.045));
-    roundRect(ctx, pad, y, w, h, 10);
+  const pad = Math.max(20, Math.round(img.width * 0.018));
+  const h = fontSize + 20;
+  const gap = 8;
+  // Right of the constellation-lock strip, over the splash art background.
+  const x = pad + Math.round(img.width * 0.055);
+  let y = img.height - pad - 26 - (lines.length * h + (lines.length - 1) * gap);
+  for (const text of lines) {
+    const w = Math.min(ctx.measureText(text).width + 36, img.width * 0.42);
+    roundRect(ctx, x, y, w, h, 9);
     ctx.fillStyle = "rgba(5, 8, 14, 0.72)";
     ctx.fill();
     ctx.fillStyle = "#FFD700";
-    ctx.fillText(text, pad + 22, y + h / 2 + 8);
-    y += h + 12;
+    ctx.fillText(text, x + 18, y + h / 2 + fontSize * 0.35);
+    y += h + gap;
   }
   return canvas.toBuffer("image/png");
 }
