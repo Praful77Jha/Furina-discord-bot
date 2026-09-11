@@ -3,6 +3,7 @@ const axios = require("axios");
 const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
 const { getCharacterInfo, findCharacterByName } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
+const { createCanvas, loadImage, roundRect } = require("../../canvasRenderer");
 
 const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
 // Akasha's API blocks most script clients (403) but answers Node/axios
@@ -141,10 +142,10 @@ async function getShowcaseCharacters(uid) {
   return data;
 }
 
-// Best Akasha percentile for a character, from its featured calculation
-// (ranking/outOf, e.g. 18496/46585 = Top 40%). Returns null when Akasha
-// is unreachable (403 on most hosts) - the card still works without it.
-async function getAkashaRank(uid, avatarId, name) {
+// Top Akasha percentiles for a character (best 3 calculations - a character
+// like Furina can hold several). Empty when Akasha is unreachable (403 on
+// most hosts) - the card still works without it.
+async function getAkashaRanks(uid, avatarId, name) {
   try {
     const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
       headers: AKASHA_HEADERS,
@@ -152,7 +153,7 @@ async function getAkashaRank(uid, avatarId, name) {
     });
     const raw = response.data.data || response.data;
     const lname = String(name || "").toLowerCase();
-    let best = null;
+    const found = [];
     for (const entry of raw) {
       const idMatch = avatarId != null && Number(entry.characterId) === Number(avatarId);
       const nameMatch = entry.name && String(entry.name).toLowerCase() === lname;
@@ -160,23 +161,44 @@ async function getAkashaRank(uid, avatarId, name) {
       const calcs = Object.values(entry.calculations || {});
       const feat = calcs.find(c => c.priority === 1) || calcs[0];
       if (!feat || !feat.outOf) continue;
-      const pct = Math.ceil((feat.ranking / feat.outOf) * 100);
-      if (!best || pct < best.pct) {
-        best = {
-          pct,
-          short: feat.short || "",
-          variant: (feat.variant && feat.variant.displayName) || "",
-          ranking: feat.ranking,
-          outOf: feat.outOf
-        };
-      }
+      found.push({
+        pct: Math.ceil((feat.ranking / feat.outOf) * 100),
+        short: feat.short || "",
+        variant: (feat.variant && feat.variant.displayName) || "",
+        ranking: feat.ranking,
+        outOf: feat.outOf
+      });
     }
-    if (!best) return null;
-    const detail = [best.short, best.variant].filter(Boolean).join(" · ");
-    return `Akasha: Top ${best.pct}%${detail ? ` (${detail})` : ""}  •  #${best.ranking}/${best.outOf}`;
+    found.sort((a, b) => a.pct - b.pct);
+    return found.slice(0, 3);
   } catch (err) {
-    return null;
+    return [];
   }
+}
+
+// Draws rank pills onto the top-left of the Enka card. Text only, no emoji
+// (host canvas has no emoji font).
+async function overlayRanks(cardBuffer, ranks) {
+  const img = await loadImage(cardBuffer);
+  const canvas = createCanvas(img.width, img.height);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, img.width, img.height);
+  const pad = Math.max(24, Math.round(img.width * 0.02));
+  ctx.font = `bold ${Math.max(22, Math.round(img.width * 0.018))}px sans-serif`;
+  ctx.textAlign = "left";
+  let y = pad + 10;
+  for (const r of ranks.slice(0, 2)) {
+    const text = `TOP ${r.pct}%  ${[r.short, r.variant].filter(Boolean).join("  ·  ")}`;
+    const w = ctx.measureText(text).width + 44;
+    const h = Math.max(44, Math.round(img.height * 0.045));
+    roundRect(ctx, pad, y, w, h, 10);
+    ctx.fillStyle = "rgba(5, 8, 14, 0.72)";
+    ctx.fill();
+    ctx.fillStyle = "#FFD700";
+    ctx.fillText(text, pad + 22, y + h / 2 + 8);
+    y += h + 12;
+  }
+  return canvas.toBuffer("image/png");
 }
 
 async function fetchEnkaCard(uid, avatarId, retries = 1) {
@@ -244,20 +266,27 @@ module.exports = {
       }
 
       // Always attempt the card first - Enka sometimes still serves a
-      // recently removed character from cache. Rank line is best-effort.
+      // recently removed character from cache. Rank pills drawn onto the
+      // card when Akasha answers (best-effort).
       if (matchedAvatar.avatarId) {
-        const [cardRes, rankLine] = await Promise.all([
+        const [cardRes, ranks] = await Promise.all([
           fetchEnkaCard(targetUid, matchedAvatar.avatarId).then(
             v => ({ ok: true, value: v }),
             e => ({ ok: false, error: e })
           ),
-          getAkashaRank(targetUid, matchedAvatar.avatarId, matchedAvatar.name)
+          getAkashaRanks(targetUid, matchedAvatar.avatarId, matchedAvatar.name)
         ]);
         if (cardRes.ok) {
-          const attachment = new AttachmentBuilder(cardRes.value, { name: "build.png" });
-          await interaction.editReply(rankLine
-            ? { content: rankLine, files: [attachment] }
-            : { files: [attachment] });
+          let finalBuffer = cardRes.value;
+          if (ranks.length > 0) {
+            try {
+              finalBuffer = await overlayRanks(cardRes.value, ranks);
+            } catch (overlayErr) {
+              console.error("Rank overlay failed:", overlayErr.message);
+            }
+          }
+          const attachment = new AttachmentBuilder(finalBuffer, { name: "build.png" });
+          await interaction.editReply({ files: [attachment] });
           return;
         }
         console.error("Card fetch failed:", cardRes.error.message);
