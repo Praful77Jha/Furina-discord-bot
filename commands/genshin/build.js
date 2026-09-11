@@ -13,6 +13,10 @@ const AKASHA_HEADERS = {
   "Accept": "application/json",
   "Referer": "https://akasha.cv/"
 };
+// Optional Cloudflare Worker forwarder (see akasha-proxy-worker.js).
+// Direct Akasha calls get 403 on most hosts - set AKASHA_PROXY to the
+// worker URL and the bot routes through it instead.
+const AKASHA_BASE = (process.env.AKASHA_PROXY || "https://akasha.cv").replace(/\/$/, "");
 // Fallback history (from the user's Akasha profile) for when Akasha's API
 // is unreachable - it answers Node but can 403 datacenter IPs.
 // Live status always comes from Enka.
@@ -33,7 +37,7 @@ const showcaseCache = new Map(); // uid -> { data: [{ name, avatarId, isLive }],
 // IDs are Numbers so they match Enka's avatarId type in the live-set check.
 async function getAkashaCharacters(uid) {
   try {
-    const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
+    const response = await axios.get(`${AKASHA_BASE}/api/getCalculationsForUser/${uid}`, {
       headers: AKASHA_HEADERS,
       timeout: 8000
     });
@@ -147,7 +151,7 @@ async function getShowcaseCharacters(uid) {
 // most hosts) - the card still works without it.
 async function getAkashaRanks(uid, avatarId, name) {
   try {
-    const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
+    const response = await axios.get(`${AKASHA_BASE}/api/getCalculationsForUser/${uid}`, {
       headers: AKASHA_HEADERS,
       timeout: 8000
     });
@@ -170,8 +174,11 @@ async function getAkashaRanks(uid, avatarId, name) {
       });
     }
     found.sort((a, b) => a.pct - b.pct);
-    return found.slice(0, 3);
+    const top = found.slice(0, 3);
+    console.error(`Akasha ranks for ${name}: ${top.length} found`);
+    return top;
   } catch (err) {
+    console.error("Akasha ranks unavailable:", err.response?.status || err.message);
     return [];
   }
 }
