@@ -111,15 +111,65 @@ function synthesize(auto) {
   };
 }
 
+async function fetchGame8Data(characterName) {
+  const slug = normalize(characterName).replace(/\s+/g, "-");
+  const url = `https://game8.co/games/Genshin-Impact/archives/${slug}`;
+  try {
+    const axios = require("axios");
+    const res = await axios.get(url, { timeout: 15000, headers: { "User-Agent": "Mozilla/5.0" } });
+    const html = res.data;
+    const data = { teams: [], statGoals: [], talentPriority: [] };
+
+    const teamMatch = html.match(/Best\s+(?:Team|Party)[\s\S]*?<\/div>/i);
+    if (teamMatch) {
+      const members = [...teamMatch[0].matchAll(/>([^<]+)</g)].map(m => m[1].trim()).filter(n => n.length > 2 && n.length < 30);
+      if (members.length >= 2) data.teams = [{ label: "Recommended", members: members.slice(0, 4), note: "" }];
+    }
+
+    const statMatch = html.match(/(?:Sub\s*Stats?|Stats?\s*to)[\s\S]*?(?:<\/div>|<\/table>)/i);
+    if (statMatch) {
+      const stats = [...statMatch[0].matchAll(/>([^<]*(?:Rate|DMG|EM|ER|ATK|DEF|HP)[^<]*)</gi)].map(m => m[1].trim()).filter(Boolean);
+      if (stats.length) data.statGoals = stats.slice(0, 5).map(s => [s, "Prioritize"]);
+    }
+
+    const talentMatch = html.match(/(?:Talent|Skill)\s*(?:Priority|Order)[\s\S]*?(?:<\/div>|<\/ol>)/i);
+    if (talentMatch) {
+      const talents = [...talentMatch[0].matchAll(/>([^<]*(?:Attack|Skill|Burst|Passive)[^<]*)</gi)].map(m => m[1].trim()).filter(Boolean);
+      if (talents.length) data.talentPriority = talents.slice(0, 3);
+    }
+
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 function getGuide(name) {
   const q = normalize(name);
   if (GUIDES[q]) return GUIDES[q];
   if (AUTO_BUILDS[q]) return synthesize(AUTO_BUILDS[q]);
-  // Short names ("ayaka") vs full names ("kamisato ayaka"), either direction.
   const keys = [...Object.keys(GUIDES), ...Object.keys(AUTO_BUILDS)];
   const hit = keys.find(k => q.includes(k) || k.includes(q));
   if (!hit) return null;
   return GUIDES[hit] || synthesize(AUTO_BUILDS[hit]);
 }
 
-module.exports = { getGuide };
+async function getGuideWithWebData(name) {
+  const guide = getGuide(name);
+  if (!guide) return null;
+
+  if (!guide.teams && !guide.statGoals && !guide.talentPriority) {
+    const webData = await fetchGame8Data(name);
+    if (webData) {
+      return {
+        ...guide,
+        teams: guide.teams || webData.teams,
+        statGoals: guide.statGoals || webData.statGoals,
+        talentPriority: guide.talentPriority || webData.talentPriority
+      };
+    }
+  }
+  return guide;
+}
+
+module.exports = { getGuide, getGuideWithWebData, fetchGame8Data };

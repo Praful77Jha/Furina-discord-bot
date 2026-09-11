@@ -1,11 +1,23 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const axios = require("axios");
-const { CHANNELS, CATEGORY_ID } = require("../../genshinConfig");
+const { CHANNELS, CATEGORY_ID, UIDS } = require("../../genshinConfig");
 const { findCharacterByName } = require("../../enkaCharacterData");
 const { getElementStyle } = require("../../elementStyle");
-const { getGuide } = require("../../characterGuides");
+const { getGuide, getGuideWithWebData } = require("../../characterGuides");
+
+const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
 
 const VIEW_CACHE = new Map();
+
+async function fetchEnkaCard(uid, avatarId) {
+  const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
+  try {
+    const response = await axios.get(url, { responseType: "arraybuffer", timeout: 45000, headers: HEADERS });
+    return Buffer.from(response.data);
+  } catch (err) {
+    return null;
+  }
+}
 
 const VIEWS = [
   { id: "profile", label: "Profile", description: "Rating, rarity, element, weapon, voice actors", emoji: "📋" },
@@ -39,8 +51,8 @@ function noGuideEmbed(cached, viewLabel) {
   return embed;
 }
 
-function profileEmbed(cached) {
-  const { enkaChar, dbChar, guide, displayName } = cached;
+async function profileEmbed(cached) {
+  const { enkaChar, dbChar, guide, displayName, cardBuffer } = cached;
   const { embed } = baseEmbed(cached, `${displayName} — Character Information`);
   const lines = [];
   if (guide?.rating) lines.push(`**Rating:** ${guide.rating}`);
@@ -57,7 +69,8 @@ function profileEmbed(cached) {
   }
   if (dbChar?.title) lines.push(`**Title:** ${dbChar.title}`);
   embed.setDescription(lines.join("\n") || "No information available.");
-  return embed;
+  if (cardBuffer) embed.setImage("attachment://character.png");
+  return { embed, attachment: cardBuffer ? new AttachmentBuilder(cardBuffer, { name: "character.png" }) : null };
 }
 
 function tierEmbed(cached) {
@@ -194,7 +207,10 @@ module.exports = {
 
     try {
       const enkaChar = await findCharacterByName(query);
-      const guide = getGuide(query) || (enkaChar ? getGuide(enkaChar.name) : null);
+      let guide = getGuide(query) || (enkaChar ? getGuide(enkaChar.name) : null);
+      if (guide) {
+        guide = await getGuideWithWebData(query) || guide;
+      }
       if (!enkaChar && !guide) {
         return interaction.editReply(`Could not find character \`${query}\`. Check the spelling and try again.`);
       }
@@ -208,13 +224,21 @@ module.exports = {
         dbChar = dbRes.data;
       } catch {}
 
-      VIEW_CACHE.set(cacheKey, { displayName, enkaChar: enkaChar || null, dbChar, guide });
+      let cardBuffer = null;
+      if (enkaChar?.avatarId) {
+        cardBuffer = await fetchEnkaCard(UIDS.MAIN, enkaChar.avatarId);
+      }
+
+      VIEW_CACHE.set(cacheKey, { displayName, enkaChar: enkaChar || null, dbChar, guide, cardBuffer });
       if (VIEW_CACHE.size > 50) {
         const first = VIEW_CACHE.keys().next().value;
         VIEW_CACHE.delete(first);
       }
 
-      await interaction.editReply({ embeds: [profileEmbed(VIEW_CACHE.get(cacheKey))], components: [buildRow(cacheKey)] });
+      const profileResult = await profileEmbed(VIEW_CACHE.get(cacheKey));
+      const replyOptions = { embeds: [profileResult.embed], components: [buildRow(cacheKey)] };
+      if (profileResult.attachment) replyOptions.files = [profileResult.attachment];
+      await interaction.editReply(replyOptions);
 
     } catch (error) {
       console.error(error);
@@ -236,7 +260,15 @@ module.exports = {
     await interaction.deferUpdate();
     try {
       const renderer = RENDERERS[view] || profileEmbed;
-      await interaction.editReply({ embeds: [renderer(cached)], components: [buildRow(cacheKey)] });
+      const result = await renderer(cached);
+      const replyOptions = { components: [buildRow(cacheKey)] };
+      if (result.embed) {
+        replyOptions.embeds = [result.embed];
+      } else if (result instanceof EmbedBuilder) {
+        replyOptions.embeds = [result];
+      }
+      if (result.attachment) replyOptions.files = [result.attachment];
+      await interaction.editReply(replyOptions);
     } catch (error) {
       console.error("Character view error:", error.message);
       await interaction.editReply({ content: "Could not render that section.", components: [buildRow(cacheKey)] });
