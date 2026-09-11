@@ -183,34 +183,7 @@ async function getAkashaRanks(uid, avatarId, name) {
   }
 }
 
-// Draws rank pills below the character name on the left side of the Enka card.
-// No background, white text, matching the stats display style.
-async function overlayRanks(cardBuffer, ranks) {
-  const img = await loadImage(cardBuffer);
-  const canvas = createCanvas(img.width, img.height);
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(img, 0, 0, img.width, img.height);
-  const lines = ranks.slice(0, 2).map(r => `TOP ${r.pct}%  ${[r.short, r.variant].filter(Boolean).join("  ·  ")}`);
-  const fontSize = Math.max(17, Math.round(img.width * 0.014));
-  ctx.font = `600 ${fontSize}px "Open Sans", sans-serif`;
-  ctx.textAlign = "left";
-  const pad = Math.max(20, Math.round(img.width * 0.018));
-  const gap = 4;
-  // Position below character name, left side
-  const x = pad + Math.round(img.width * 0.02);
-  let y = pad + Math.round(img.height * 0.18) + fontSize;
-  for (const text of lines) {
-    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetX = 1;
-    ctx.shadowOffsetY = 1;
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(text, x, y);
-    ctx.shadowColor = "transparent";
-    y += fontSize + gap;
-  }
-  return canvas.toBuffer("image/png");
-}
+
 
 async function fetchEnkaCard(uid, avatarId, retries = 1) {
   const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
@@ -280,23 +253,10 @@ module.exports = {
       // recently removed character from cache. Rank pills drawn onto the
       // card when Akasha answers (best-effort).
       if (matchedAvatar.avatarId) {
-        const [cardRes, ranks] = await Promise.all([
-          fetchEnkaCard(targetUid, matchedAvatar.avatarId).then(
-            v => ({ ok: true, value: v }),
-            e => ({ ok: false, error: e })
-          ),
-          getAkashaRanks(targetUid, matchedAvatar.avatarId, matchedAvatar.name)
-        ]);
+        const cardRes = await fetchEnkaCard(targetUid, matchedAvatar.avatarId)
+          .then(v => ({ ok: true, value: v }), e => ({ ok: false, error: e }));
         if (cardRes.ok) {
-          let finalBuffer = cardRes.value;
-          if (ranks.length > 0) {
-            try {
-              finalBuffer = await overlayRanks(cardRes.value, ranks);
-            } catch (overlayErr) {
-              console.error("Rank overlay failed:", overlayErr.message);
-            }
-          }
-          const attachment = new AttachmentBuilder(finalBuffer, { name: "build.png" });
+          const attachment = new AttachmentBuilder(cardRes.value, { name: "build.png" });
           await interaction.editReply({ files: [attachment] });
           return;
         }
