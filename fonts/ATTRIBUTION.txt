@@ -1,0 +1,6 @@
+Fonts in this folder:
+- OpenSans-SemiBold.ttf / OpenSans-Bold.ttf
+  Open Sans, designed by Steve Matteson, licensed under the
+  Apache License, Version 2.0. Obtained via Google Fonts
+  (https://fonts.google.com/specimen/Open+Sans) for use in
+  bot-generated card overlays.

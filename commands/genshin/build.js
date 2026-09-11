@@ -193,7 +193,7 @@ async function overlayRanks(cardBuffer, ranks) {
   ctx.drawImage(img, 0, 0, img.width, img.height);
   const lines = ranks.slice(0, 2).map(r => `TOP ${r.pct}%  ${[r.short, r.variant].filter(Boolean).join("  ·  ")}`);
   const fontSize = Math.max(17, Math.round(img.width * 0.014));
-  ctx.font = `600 ${fontSize}px sans-serif`;
+  ctx.font = `600 ${fontSize}px "Open Sans", sans-serif`;
   ctx.textAlign = "left";
   const pad = Math.max(20, Math.round(img.width * 0.018));
   const h = fontSize + 20;

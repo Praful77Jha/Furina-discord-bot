@@ -2,6 +2,21 @@
 // focused on layout decisions instead of re-implementing primitives.
 // Requires: npm install @napi-rs/canvas  (faster + easier native build than node-canvas on most hosts)
 const { createCanvas, loadImage, GlobalFonts } = require("@napi-rs/canvas");
+const path = require("path");
+const fs = require("fs");
+
+// Bundled Open Sans (same family Enka's site loads) so canvas text matches
+// card typography even on hosts with no fonts installed. Skipped silently
+// if the fonts folder wasn't uploaded.
+try {
+  const dir = path.join(__dirname, "fonts");
+  const semi = path.join(dir, "OpenSans-SemiBold.ttf");
+  const bold = path.join(dir, "OpenSans-Bold.ttf");
+  if (fs.existsSync(semi)) GlobalFonts.registerFromPath(semi, "Open Sans");
+  if (fs.existsSync(bold)) GlobalFonts.registerFromPath(bold, "Open Sans");
+} catch (err) {
+  console.error("Font registration failed:", err.message);
+}
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
