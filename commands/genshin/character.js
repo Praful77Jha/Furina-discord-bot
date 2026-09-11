@@ -49,6 +49,25 @@ function baseCanvas(ctx2dHeight) {
   return { canvas, ctx: canvas.getContext("2d") };
 }
 
+// Host has no emoji font (renders as tofu boxes), so element identity is a
+// drawn dot and rarity is drawn star polygons - never font glyphs.
+function drawStar(ctx, cx, cy, r, color) {
+  ctx.save();
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rr = i % 2 === 0 ? r : r * 0.45;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const px = cx + Math.cos(a) * rr;
+    const py = cy + Math.sin(a) * rr;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+}
+
 function paintShell(ctx, h, style, title, subtitle) {
   const colorHex = `#${style.color.toString(16).padStart(6, "0")}`;
   ctx.fillStyle = "#0B0E14";
@@ -58,7 +77,13 @@ function paintShell(ctx, h, style, title, subtitle) {
   ctx.textAlign = "left";
   ctx.fillStyle = "#FFFFFF";
   ctx.font = "bold 26px sans-serif";
-  ctx.fillText(title, 30, 48);
+  const cleanTitle = title.replace(/^[^\s]+\s/, "");
+  ctx.beginPath();
+  ctx.arc(20, 39, 9, 0, Math.PI * 2);
+  ctx.fillStyle = colorHex;
+  ctx.fill();
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText(cleanTitle, 38, 48);
   if (subtitle) {
     ctx.fillStyle = "#7A8AA0";
     ctx.font = "15px sans-serif";
@@ -119,7 +144,12 @@ async function renderProfile(cached) {
   const { enkaChar, dbChar, guide } = cached;
   const name = guide?.name || enkaChar?.name || "Unknown";
   const style = getElementStyle(guide?.element || enkaChar?.element);
-  const H = 470;
+  const rowCount = (guide?.rating ? 1 : 0)
+    + ((guide?.rarity || enkaChar?.rarity) ? 1 : 0)
+    + ((guide?.element || enkaChar?.element) ? 1 : 0)
+    + ((guide?.weapon || enkaChar?.weaponType) ? 1 : 0)
+    + (guide?.va ? 2 : (dbChar?.nation ? 1 : 0));
+  const H = Math.max(400, 150 + rowCount * 46 + 60);
   const { canvas, ctx } = baseCanvas(H);
   const colorHex = paintShell(ctx, H, style, `${style.emoji} ${name}`, "Character Information");
 
@@ -143,11 +173,11 @@ async function renderProfile(cached) {
   const rows = [];
   if (guide?.rating) rows.push(["Rating", guide.rating, "#FFD700"]);
   const rarity = guide?.rarity || enkaChar?.rarity;
-  if (rarity) rows.push(["Rarity", "★".repeat(rarity), "#4FC3F7"]);
+  if (rarity) rows.push(["Rarity", "STARS:" + rarity, "#4FC3F7"]);
   const element = guide?.element || enkaChar?.element;
   if (element) {
     const es = getElementStyle(element);
-    rows.push(["Element", `${es.emoji} ${es.label}`, "#FFFFFF"]);
+    rows.push(["Element", es.label, "#FFFFFF"]);
   }
   const weapon = guide?.weapon || enkaChar?.weaponType;
   if (weapon) rows.push(["Weapon", weapon, "#FFFFFF"]);
@@ -166,9 +196,14 @@ async function renderProfile(cached) {
     ctx.fillStyle = "#7A8AA0";
     ctx.font = "bold 16px sans-serif";
     if (label) ctx.fillText(label, x0, y);
-    ctx.fillStyle = color;
-    ctx.font = "bold 17px sans-serif";
-    ctx.fillText(value, x1, y);
+    if (String(value).startsWith("STARS:")) {
+      const n = parseInt(String(value).slice(6), 10) || 0;
+      for (let i = 0; i < n; i++) drawStar(ctx, x1 + 10 + i * 26, y - 6, 9, color);
+    } else {
+      ctx.fillStyle = color;
+      ctx.font = "bold 17px sans-serif";
+      ctx.fillText(value, x1, y);
+    }
     y += 16;
     ctx.fillStyle = "rgba(255,255,255,0.08)";
     ctx.fillRect(x0, y, CARD_W - x0 - 30, 1);
@@ -198,7 +233,7 @@ async function renderTier(cached) {
   const { guide, displayName, enkaChar } = cached;
   if (!guide?.tiers) return renderNoGuide(cached, "Tier List Rankings");
   const style = getElementStyle(guide.element || enkaChar?.element);
-  const H = 360;
+  const H = 320;
   const { canvas, ctx } = baseCanvas(H);
   const colorHex = paintShell(ctx, H, style, `${style.emoji} ${displayName}`, "Tier List Rankings");
   sectionTitle(ctx, "▍TIER LIST RANKINGS", 30, 115, colorHex);
@@ -235,7 +270,11 @@ async function renderBuild(cached) {
   if (!guide?.build) return renderNoGuide(cached, "Best Build");
   const style = getElementStyle(guide.element || enkaChar?.element);
   const b = guide.build;
-  const H = 700;
+  const altW = (b.altWeapons || []).slice(0, 5).length;
+  const altA = (b.altArtifacts || []).slice(0, 3).length;
+  const subN = (b.subStats || []).slice(0, 5).length;
+  const msN = ["sands", "goblet", "circlet"].filter(k => b.mainStats?.[k]).length;
+  const H = 118 + 52 + altW * 21 + 10 + 52 + altA * 21 + 10 + 26 + msN * 23 + 8 + 26 + subN * 23 + 56;
   const { canvas, ctx } = baseCanvas(H);
   const colorHex = paintShell(ctx, H, style, `${style.emoji} ${displayName}`, b.title || "Best Build");
   let y = 118;
@@ -245,7 +284,8 @@ async function renderBuild(cached) {
   y += 28;
   ctx.fillStyle = "#FFD700";
   ctx.font = "bold 17px sans-serif";
-  ctx.fillText(`★ ${b.weapon}`, 30, y);
+  const weaponName = b.weapon.length > 50 ? b.weapon.slice(0, 48) + "…" : b.weapon;
+  ctx.fillText(`Weapon: ${weaponName}`, 30, y);
   y += 24;
   ctx.fillStyle = "#8899B0";
   ctx.font = "14px sans-serif";
@@ -362,7 +402,11 @@ async function renderTalents(cached) {
   const { guide, displayName, enkaChar, dbChar } = cached;
   const style = getElementStyle(guide?.element || enkaChar?.element);
   const prio = guide?.talentPriority;
-  const H = 400;
+  const noteText = guide.talentNote || (dbChar?.skillTalents || []).slice(0, 2).map(t => t.name).join(" • ");
+  const measCtx = createCanvas(10, 10).getContext("2d");
+  measCtx.font = "14px sans-serif";
+  const noteLineCount = noteText ? wrapLines(measCtx, noteText, CARD_W - 60, 4).length : 0;
+  const H = 250 + noteLineCount * 22 + 36;
   const { canvas, ctx } = baseCanvas(H);
   const colorHex = paintShell(ctx, H, style, `${style.emoji} ${displayName}`, "Talent Priority");
   if (!prio?.length) return renderNoGuide(cached, "Talent Priority");
@@ -386,7 +430,7 @@ async function renderTalents(cached) {
   });
 
   const note = guide.talentNote || (dbChar?.skillTalents || []).slice(0, 2).map(t => t.name).join(" • ");
-  if (note) {
+  if (noteLineCount > 0) {
     ctx.fillStyle = "#8899B0";
     ctx.font = "14px sans-serif";
     ctx.textAlign = "left";
@@ -399,8 +443,8 @@ async function renderGear(cached) {
   const { guide, displayName, enkaChar } = cached;
   if (!guide?.weapons?.length && !guide?.artifacts?.length) return renderNoGuide(cached, "Weapons & Artifacts");
   const style = getElementStyle(guide.element || enkaChar?.element);
-  const items = [...(guide.weapons || []).map(w => ({ ...w, kind: "⚔" })), ...(guide.artifacts || []).map(a => ({ ...a, kind: "🏺" }))];
-  const H = 140 + items.slice(0, 12).length * 78 + 30;
+  const items = [...(guide.weapons || []).map(w => ({ ...w, kind: "W" })), ...(guide.artifacts || []).map(a => ({ ...a, kind: "A" }))];
+  const H = 130 + items.slice(0, 12).length * 78 + 24;
   const { canvas, ctx } = baseCanvas(H);
   const colorHex = paintShell(ctx, H, style, `${style.emoji} ${displayName}`, "Weapons & Artifacts");
   let y = 120;
@@ -411,8 +455,8 @@ async function renderGear(cached) {
     ctx.fill();
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "bold 15px sans-serif";
-    const title = `${item.kind} ${item.name}`;
-    ctx.fillText(title.length > 52 ? title.slice(0, 50) + "…" : title, 46, y + 24);
+    const title = item.name.length > 52 ? item.name.slice(0, 50) + "…" : item.name;
+    ctx.fillText(title, 46, y + 24);
     if (item.tag) {
       ctx.fillStyle = "#FFD700";
       ctx.font = "bold 12px sans-serif";

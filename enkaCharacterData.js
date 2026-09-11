@@ -6,6 +6,18 @@ const REFRESH_MS = 6 * 60 * 60 * 1000;
 
 const HEADERS = { "User-Agent": "FurinaDiscordBot/1.0" };
 
+// Enka's raw weapon keys ("WEAPON_SWORD_ONE_HAND") are ugly on cards.
+const WEAPON_PRETTY = {
+  "SWORD ONE HAND": "Sword", "SWORD": "Sword",
+  "CLAYMORE": "Claymore", "POLE": "Polearm",
+  "BOW": "Bow", "CATALYST": "Catalyst"
+};
+
+function prettyWeapon(raw) {
+  const key = String(raw || "").toUpperCase().trim();
+  return WEAPON_PRETTY[key] || raw;
+}
+
 let cache = null;
 
 const NEW_CHARACTERS = {
@@ -43,7 +55,7 @@ async function loadCharacterData() {
       icon: faceIcon,
       splashArt,
       element: info.Element || "Unknown",
-      weaponType: (info.WeaponType || "").replace("WEAPON_", "").replace(/_/g, " "),
+      weaponType: prettyWeapon((info.WeaponType || "").replace("WEAPON_", "").replace(/_/g, " ")),
       rarity: rarityMap[info.QualityType] || null
     };
   }
@@ -56,7 +68,7 @@ async function loadCharacterData() {
         icon: `https://enka.network/ui/UI_AvatarIcon_${baseName}.png`,
         splashArt: `https://enka.network/ui/UI_Gacha_AvatarImg_${baseName}.png`,
         element: data.element,
-        weaponType: data.weaponType,
+        weaponType: prettyWeapon(data.weaponType),
         rarity: 5
       };
     }

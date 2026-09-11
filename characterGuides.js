@@ -84,9 +84,9 @@ function synthesize(auto) {
     element: null,
     weapon: null,
     rarity: null,
-    rating: null,
+    rating: auto.rating || null,
     va: null,
-    tiers: null,
+    tiers: auto.tiers || null,
     build: {
       title: (auto.role ? auto.role + " Build" : "Best Build"),
       weapon: auto.weapon,

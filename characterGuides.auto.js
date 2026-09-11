@@ -1,6 +1,6 @@
-// Auto-generated from Game8 'All Best Builds' hub. DO NOT hand-edit - regenerate.
-// Covers build + basic gear lists for every character. Tiers/teams/goals/
-// priority stay hand-curated in characterGuides.js (Sandrone done).
+// Auto-generated from Game8 'All Best Builds' hub + 7.0 Tier List. DO NOT hand-edit.
+// Covers build + gear + tiers for every character. Teams/goals/priority stay
+// hand-curated in characterGuides.js (Sandrone done).
 const AUTO_BUILDS = {
   "aino": {
     "name": "Aino",
@@ -19,7 +19,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "albedo": {
     "name": "Albedo",
@@ -37,7 +44,14 @@ const AUTO_BUILDS = {
       "DEF%",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A+",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "alhaitham": {
     "name": "Alhaitham",
@@ -57,7 +71,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "aloy": {
     "name": "Aloy",
@@ -78,7 +99,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT DMG",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "amber": {
     "name": "Amber",
@@ -97,7 +125,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "D",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "arlecchino": {
     "name": "Arlecchino",
@@ -116,7 +151,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "A",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "ayaka": {
     "name": "Ayaka",
@@ -135,7 +177,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "ATK%",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "ayato": {
     "name": "Ayato",
@@ -154,7 +203,14 @@ const AUTO_BUILDS = {
       "CRIT Rate or CRIT DMG",
       "ATK%",
       "HP%"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "baizhu": {
     "name": "Baizhu",
@@ -172,7 +228,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "HP%",
       "HP"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "barbara": {
     "name": "Barbara",
@@ -188,7 +251,14 @@ const AUTO_BUILDS = {
     },
     "subStats": [
       "HP%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "beidou": {
     "name": "Beidou",
@@ -207,7 +277,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "bennett": {
     "name": "Bennett",
@@ -228,7 +305,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "candace": {
     "name": "Candace",
@@ -248,7 +332,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "Crit DMG",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "charlotte": {
     "name": "Charlotte",
@@ -267,7 +358,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "Energy Recharge",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "chasca": {
     "name": "Chasca",
@@ -286,7 +384,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "A+",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "chevreuse": {
     "name": "Chevreuse",
@@ -307,7 +412,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "HP%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "S",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "chiori": {
     "name": "Chiori",
@@ -326,7 +438,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "DEF%",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "chongyun": {
     "name": "Chongyun",
@@ -346,7 +465,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "C",
+      "support": "D",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "citlali": {
     "name": "Citlali",
@@ -363,7 +489,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Elemental Mastery",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "clorinde": {
     "name": "Clorinde",
@@ -382,7 +515,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "collei": {
     "name": "Collei",
@@ -402,7 +542,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "columbina": {
     "name": "Columbina",
@@ -422,7 +569,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "SS",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "cyno": {
     "name": "Cyno",
@@ -441,7 +595,14 @@ const AUTO_BUILDS = {
       "Crit Rate/Crit DMG",
       "Elemental Mastery",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "dahlia": {
     "name": "Dahlia",
@@ -458,7 +619,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Energy Recharge",
       "HP%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "dehya": {
     "name": "Dehya",
@@ -479,7 +647,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "HP%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "C",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "diluc": {
     "name": "Diluc",
@@ -498,7 +673,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "diona": {
     "name": "Diona",
@@ -516,7 +698,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "HP%",
       "HP"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "dori": {
     "name": "Dori",
@@ -535,7 +724,14 @@ const AUTO_BUILDS = {
       "HP%",
       "ATK%",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "durin": {
     "name": "Durin",
@@ -558,7 +754,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "S",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "emilie": {
     "name": "Emilie",
@@ -577,7 +780,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A+",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "escoffier": {
     "name": "Escoffier",
@@ -596,7 +806,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "ATK%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "S",
+      "support": "S",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "eula": {
     "name": "Eula",
@@ -615,7 +832,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "faruzan": {
     "name": "Faruzan",
@@ -633,7 +857,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "fischl": {
     "name": "Fischl",
@@ -651,7 +882,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "S",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "flins": {
     "name": "Flins",
@@ -670,7 +908,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "freminet": {
     "name": "Freminet",
@@ -693,7 +938,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "furina": {
     "name": "Furina",
@@ -713,7 +965,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "HP%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "S",
+      "support": "S",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "gaming": {
     "name": "Gaming",
@@ -733,7 +992,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "CRIT Rate",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "ganyu": {
     "name": "Ganyu",
@@ -756,7 +1022,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "gorou": {
     "name": "Gorou",
@@ -776,7 +1049,14 @@ const AUTO_BUILDS = {
       "DEF%",
       "Energy Recharge",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "heizou": {
     "name": "Heizou",
@@ -797,7 +1077,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "hu tao": {
     "name": "Hu Tao",
@@ -816,7 +1103,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "HP%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "iansan": {
     "name": "Iansan",
@@ -833,7 +1127,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "ifa": {
     "name": "Ifa",
@@ -850,7 +1151,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Elemental Mastery",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "illuga": {
     "name": "Illuga",
@@ -868,7 +1176,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "Energy Recharge",
       "DEF%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A+",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "ineffa": {
     "name": "Ineffa",
@@ -888,7 +1203,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "Elemental Mastery",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "SS",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "itto": {
     "name": "Itto",
@@ -907,7 +1229,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "jahoda": {
     "name": "Jahoda",
@@ -927,7 +1256,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "jean": {
     "name": "Jean",
@@ -946,7 +1282,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "kachina": {
     "name": "Kachina",
@@ -965,7 +1308,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "DEF%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "C",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "kaeya": {
     "name": "Kaeya",
@@ -983,7 +1333,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "CRIT DMG",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "kaveh": {
     "name": "Kaveh",
@@ -1003,7 +1360,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "kazuha": {
     "name": "Kazuha",
@@ -1023,7 +1387,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A+",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "keqing": {
     "name": "Keqing",
@@ -1042,7 +1413,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "kinich": {
     "name": "Kinich",
@@ -1062,7 +1440,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "A+",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "kirara": {
     "name": "Kirara",
@@ -1082,7 +1467,14 @@ const AUTO_BUILDS = {
       "HP%",
       "HP",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "klee": {
     "name": "Klee",
@@ -1101,7 +1493,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "A",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "kokomi": {
     "name": "Kokomi",
@@ -1119,7 +1518,14 @@ const AUTO_BUILDS = {
       "HP%",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "lan yan": {
     "name": "Lan Yan",
@@ -1139,7 +1545,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "lauma": {
     "name": "Lauma",
@@ -1158,7 +1571,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "SS",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "layla": {
     "name": "Layla",
@@ -1177,7 +1597,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "linnea": {
     "name": "Linnea",
@@ -1197,7 +1624,14 @@ const AUTO_BUILDS = {
       "DEF%",
       "Elemental Mastery",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "SS",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "lisa": {
     "name": "Lisa",
@@ -1216,7 +1650,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "C",
+      "support": "D",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "lohen": {
     "name": "Lohen",
@@ -1235,7 +1676,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "A+",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "lynette": {
     "name": "Lynette",
@@ -1255,7 +1703,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "lyney": {
     "name": "Lyney",
@@ -1274,7 +1729,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT Rate",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "mavuika": {
     "name": "Mavuika",
@@ -1295,7 +1757,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "S",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "mika": {
     "name": "Mika",
@@ -1313,7 +1782,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "HP%",
       "Crit Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "mizuki": {
     "name": "Mizuki",
@@ -1330,7 +1806,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Elemental Mastery",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "S",
+      "sub": "-",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "mona": {
     "name": "Mona",
@@ -1349,7 +1832,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "A+",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "mualani": {
     "name": "Mualani",
@@ -1369,7 +1859,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "CRIT Rate",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "A+",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "nahida": {
     "name": "Nahida",
@@ -1388,7 +1885,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A+",
+      "support": "A+",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "navia": {
     "name": "Navia",
@@ -1410,7 +1914,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "nefer": {
     "name": "Nefer",
@@ -1428,7 +1939,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "neuvillette": {
     "name": "Neuvillette",
@@ -1448,7 +1966,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "A",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "nicole": {
     "name": "Nicole",
@@ -1465,7 +1990,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "ATK%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "nilou": {
     "name": "Nilou",
@@ -1486,7 +2018,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "Flat HP",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "ningguang": {
     "name": "Ningguang",
@@ -1504,7 +2043,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "noelle": {
     "name": "Noelle",
@@ -1527,7 +2073,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate%",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "D",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "ororon": {
     "name": "Ororon",
@@ -1546,7 +2099,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "prune": {
     "name": "Prune",
@@ -1563,7 +2123,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "ATK%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "A+",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "qiqi": {
     "name": "Qiqi",
@@ -1581,7 +2148,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "ATK",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "S",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "raiden": {
     "name": "Raiden",
@@ -1604,7 +2178,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "A",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "razor": {
     "name": "Razor",
@@ -1623,7 +2204,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "rosaria": {
     "name": "Rosaria",
@@ -1646,7 +2234,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "sandrone": {
     "name": "Sandrone",
@@ -1666,7 +2261,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "sara": {
     "name": "Sara",
@@ -1685,7 +2287,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "sayu": {
     "name": "Sayu",
@@ -1705,7 +2314,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "C",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "sethos": {
     "name": "Sethos",
@@ -1724,7 +2340,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "shenhe": {
     "name": "Shenhe",
@@ -1743,7 +2366,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "ATK%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A+",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "shinobu": {
     "name": "Shinobu",
@@ -1763,7 +2393,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "HP%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "sigewinne": {
     "name": "Sigewinne",
@@ -1782,7 +2419,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "HP%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "skirk": {
     "name": "Skirk",
@@ -1800,7 +2444,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "S",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "sucrose": {
     "name": "Sucrose",
@@ -1819,7 +2470,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A",
+      "support": "SS",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "tartaglia": {
     "name": "Tartaglia",
@@ -1838,7 +2496,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "thoma": {
     "name": "Thoma",
@@ -1859,7 +2524,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Energy Recharge",
       "HP%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "tighnari": {
     "name": "Tighnari",
@@ -1878,7 +2550,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "traveler (anemo)": {
     "name": "Traveler (Anemo)",
@@ -1895,7 +2574,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Energy Recharge",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "D",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "traveler (dendro)": {
     "name": "Traveler (Dendro)",
@@ -1914,7 +2600,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "Crit Rate",
       "Crit DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "traveler (electro)": {
     "name": "Traveler (Electro)",
@@ -1933,7 +2626,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "CRIT Rate",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "C",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "traveler (geo)": {
     "name": "Traveler (Geo)",
@@ -1952,7 +2652,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "D",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "traveler (hydro)": {
     "name": "Traveler (Hydro)",
@@ -1972,7 +2679,14 @@ const AUTO_BUILDS = {
       "Elemental Mastery",
       "Energy Recharge",
       "ATK% or HP%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "D",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "traveler (pyro)": {
     "name": "Traveler (Pyro)",
@@ -1991,7 +2705,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "B",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "varesa": {
     "name": "Varesa",
@@ -2011,7 +2732,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "A+",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "varka": {
     "name": "Varka",
@@ -2031,7 +2759,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "S",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "venti": {
     "name": "Venti",
@@ -2055,7 +2790,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "A",
+      "sub": "A+",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "wanderer": {
     "name": "Wanderer",
@@ -2074,7 +2816,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "wriothesley": {
     "name": "Wriothesley",
@@ -2094,7 +2843,14 @@ const AUTO_BUILDS = {
       "CRIT DMG",
       "Energy Recharge",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "xiangling": {
     "name": "Xiangling",
@@ -2114,7 +2870,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A+",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "xianyun": {
     "name": "Xianyun",
@@ -2131,7 +2894,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Energy Recharge",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "xiao": {
     "name": "Xiao",
@@ -2150,7 +2920,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT Rate",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "B",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "xilonen": {
     "name": "Xilonen",
@@ -2167,7 +2944,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "Energy Recharge",
       "DEF%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "S",
+      "exploration": "SS"
+    },
+    "rating": "S"
   },
   "xingqiu": {
     "name": "Xingqiu",
@@ -2187,7 +2971,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "ATK%",
       "Elemental Mastery"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A+",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "xinyan": {
     "name": "Xinyan",
@@ -2207,7 +2998,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "ATK",
       "CRIT DMG"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "D",
+      "support": "D",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "yae miko": {
     "name": "Yae Miko",
@@ -2226,7 +3024,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "SS",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   },
   "yanfei": {
     "name": "Yanfei",
@@ -2244,7 +3049,14 @@ const AUTO_BUILDS = {
       "ATK%",
       "CRIT DMG",
       "CRIT Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "D",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "D"
   },
   "yaoyao": {
     "name": "Yaoyao",
@@ -2263,7 +3075,14 @@ const AUTO_BUILDS = {
       "CRIT Rate / DMG",
       "Elemental Mastery",
       "HP%"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "yelan": {
     "name": "Yelan",
@@ -2282,7 +3101,14 @@ const AUTO_BUILDS = {
       "CRIT Rate",
       "CRIT DMG",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "A+",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "A+"
   },
   "yoimiya": {
     "name": "Yoimiya",
@@ -2300,7 +3126,14 @@ const AUTO_BUILDS = {
       "Energy Recharge",
       "CRIT DMG",
       "CRIT Rate. ATK%"
-    ]
+    ],
+    "tiers": {
+      "main": "C",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "C"
   },
   "yun jin": {
     "name": "Yun Jin",
@@ -2318,7 +3151,14 @@ const AUTO_BUILDS = {
       "DEF%",
       "Energy Recharge",
       "Crit Rate"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "B",
+      "exploration": "SS"
+    },
+    "rating": "B"
   },
   "zhongli": {
     "name": "Zhongli",
@@ -2340,7 +3180,14 @@ const AUTO_BUILDS = {
     "subStats": [
       "HP%",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "-",
+      "sub": "-",
+      "support": "A",
+      "exploration": "SS"
+    },
+    "rating": "A"
   },
   "zibai": {
     "name": "Zibai",
@@ -2360,7 +3207,14 @@ const AUTO_BUILDS = {
       "DEF%",
       "Elemental Mastery",
       "Energy Recharge"
-    ]
+    ],
+    "tiers": {
+      "main": "SS",
+      "sub": "-",
+      "support": "-",
+      "exploration": "SS"
+    },
+    "rating": "SS"
   }
 };
 

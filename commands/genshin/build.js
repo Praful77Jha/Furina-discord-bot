@@ -23,8 +23,9 @@ const AKASHA_HISTORY = [
 ];
 
 // Cache of the merged Akasha+Enka character list per UID, so autocomplete
-// doesn't have to hit both APIs on every keystroke.
-const SHOWCASE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min - how long before a background refresh kicks off
+// doesn't have to hit both APIs on every keystroke. Short TTL so showcase
+// swaps show up fast; /build itself always fetches fresh (see execute).
+const SHOWCASE_CACHE_TTL_MS = 60 * 1000;
 const showcaseCache = new Map(); // uid -> { data: [{ name, avatarId, isLive }], fetchedAt, refreshing }
 
 // Live Akasha history first, static profile list as fallback.
@@ -140,6 +141,44 @@ async function getShowcaseCharacters(uid) {
   return data;
 }
 
+// Best Akasha percentile for a character, from its featured calculation
+// (ranking/outOf, e.g. 18496/46585 = Top 40%). Returns null when Akasha
+// is unreachable (403 on most hosts) - the card still works without it.
+async function getAkashaRank(uid, avatarId, name) {
+  try {
+    const response = await axios.get(`https://akasha.cv/api/getCalculationsForUser/${uid}`, {
+      headers: AKASHA_HEADERS,
+      timeout: 8000
+    });
+    const raw = response.data.data || response.data;
+    const lname = String(name || "").toLowerCase();
+    let best = null;
+    for (const entry of raw) {
+      const idMatch = avatarId != null && Number(entry.characterId) === Number(avatarId);
+      const nameMatch = entry.name && String(entry.name).toLowerCase() === lname;
+      if (!idMatch && !nameMatch) continue;
+      const calcs = Object.values(entry.calculations || {});
+      const feat = calcs.find(c => c.priority === 1) || calcs[0];
+      if (!feat || !feat.outOf) continue;
+      const pct = Math.ceil((feat.ranking / feat.outOf) * 100);
+      if (!best || pct < best.pct) {
+        best = {
+          pct,
+          short: feat.short || "",
+          variant: (feat.variant && feat.variant.displayName) || "",
+          ranking: feat.ranking,
+          outOf: feat.outOf
+        };
+      }
+    }
+    if (!best) return null;
+    const detail = [best.short, best.variant].filter(Boolean).join(" · ");
+    return `Akasha: Top ${best.pct}%${detail ? ` (${detail})` : ""}  •  #${best.ranking}/${best.outOf}`;
+  } catch (err) {
+    return null;
+  }
+}
+
 async function fetchEnkaCard(uid, avatarId, retries = 1) {
   const url = `https://cards.enka.network/u/${uid}/${avatarId}/image?lang=en&substats=true&uid=true`;
   try {
@@ -181,7 +220,9 @@ module.exports = {
     const targetUid = UIDS.MAIN;
 
     try {
-      const showcase = await getShowcaseCharacters(targetUid);
+      // Always fresh - never serve a stale showcase on an explicit /build.
+      const showcase = await fetchAndMerge(targetUid);
+      showcaseCache.set(targetUid, { data: showcase, fetchedAt: Date.now(), refreshing: false });
 
       if (!showcase || showcase.length === 0) {
         return interaction.editReply(`No showcased characters found for UID \`${targetUid}\`.`);
@@ -203,16 +244,23 @@ module.exports = {
       }
 
       // Always attempt the card first - Enka sometimes still serves a
-      // recently removed character from cache. Notice below on failure.
+      // recently removed character from cache. Rank line is best-effort.
       if (matchedAvatar.avatarId) {
-        try {
-          const buffer = await fetchEnkaCard(targetUid, matchedAvatar.avatarId);
-          const attachment = new AttachmentBuilder(buffer, { name: "build.png" });
-          await interaction.editReply({ files: [attachment] });
+        const [cardRes, rankLine] = await Promise.all([
+          fetchEnkaCard(targetUid, matchedAvatar.avatarId).then(
+            v => ({ ok: true, value: v }),
+            e => ({ ok: false, error: e })
+          ),
+          getAkashaRank(targetUid, matchedAvatar.avatarId, matchedAvatar.name)
+        ]);
+        if (cardRes.ok) {
+          const attachment = new AttachmentBuilder(cardRes.value, { name: "build.png" });
+          await interaction.editReply(rankLine
+            ? { content: rankLine, files: [attachment] }
+            : { files: [attachment] });
           return;
-        } catch (cardErr) {
-          console.error("Card fetch failed:", cardErr.message);
         }
+        console.error("Card fetch failed:", cardRes.error.message);
       }
 
       const charInfo = await getCharacterInfo(matchedAvatar.avatarId);
