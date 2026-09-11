@@ -183,9 +183,8 @@ async function getAkashaRanks(uid, avatarId, name) {
   }
 }
 
-// Draws rank pills into the empty strip bottom-left of the Enka card
-// (above the UID line, clear of name/constellations/artifacts).
-// Plain sans, card-matched size - host canvas has no display font.
+// Draws rank pills below the character name on the left side of the Enka card.
+// No background, white text, matching the stats display style.
 async function overlayRanks(cardBuffer, ranks) {
   const img = await loadImage(cardBuffer);
   const canvas = createCanvas(img.width, img.height);
@@ -196,19 +195,19 @@ async function overlayRanks(cardBuffer, ranks) {
   ctx.font = `600 ${fontSize}px "Open Sans", sans-serif`;
   ctx.textAlign = "left";
   const pad = Math.max(20, Math.round(img.width * 0.018));
-  const h = fontSize + 20;
-  const gap = 8;
-  // Right of the constellation-lock strip, over the splash art background.
-  const x = pad + Math.round(img.width * 0.055);
-  let y = img.height - pad - 26 - (lines.length * h + (lines.length - 1) * gap);
+  const gap = 4;
+  // Position below character name, left side
+  const x = pad + Math.round(img.width * 0.02);
+  let y = pad + Math.round(img.height * 0.18) + fontSize;
   for (const text of lines) {
-    const w = Math.min(ctx.measureText(text).width + 36, img.width * 0.42);
-    roundRect(ctx, x, y, w, h, 9);
-    ctx.fillStyle = "rgba(5, 8, 14, 0.72)";
-    ctx.fill();
-    ctx.fillStyle = "#FFD700";
-    ctx.fillText(text, x + 18, y + h / 2 + fontSize * 0.35);
-    y += h + gap;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(text, x, y);
+    ctx.shadowColor = "transparent";
+    y += fontSize + gap;
   }
   return canvas.toBuffer("image/png");
 }
