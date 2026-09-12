@@ -30,6 +30,15 @@ module.exports = {
       option
         .setName('amount')
         .setDescription('Custom amount (Captain only)')
+    )
+    .addStringOption(option =>
+      option
+        .setName('account')
+        .setDescription('Account (Reddit only)')
+        .addChoices(
+          { name: 'MAIN', value: 'MAIN' },
+          { name: 'Alt 1', value: 'Alt 1' }
+        )
     ),
 
   async execute(interaction) {
@@ -117,10 +126,17 @@ module.exports = {
 
     else {
 
-      // Celebi is now fixed to these values.
-      // The user no longer needs to select them.
       const provider = 'CELEBI';
-      const account = 'MAIN';
+      const isReddit = link.includes('reddit.com');
+      const account = isReddit
+        ? (interaction.options.getString('account') || 'MAIN')
+        : 'MAIN';
+
+      if (isReddit && !interaction.options.getString('account')) {
+        return interaction.editReply(
+          '⚠️ Reddit link detected. Please use the **account** option to select MAIN or Alt 1.'
+        );
+      }
 
       const { taskType, credits } =
         detectCelebiTaskDetails(link);
