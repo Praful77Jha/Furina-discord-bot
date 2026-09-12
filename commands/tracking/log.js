@@ -26,15 +26,10 @@ module.exports = {
         .setDescription('The task link')
         .setRequired(true)
     )
-    .addNumberOption(option =>
-      option
-        .setName('amount')
-        .setDescription('Custom amount (Captain only)')
-    )
     .addStringOption(option =>
       option
         .setName('account')
-        .setDescription('Account (Reddit only)')
+        .setDescription('Account for Reddit links (defaults to MAIN)')
         .addChoices(
           { name: 'MAIN', value: 'MAIN' },
           { name: 'Alt 1', value: 'Alt 1' }
@@ -131,12 +126,6 @@ module.exports = {
       const account = isReddit
         ? (interaction.options.getString('account') || 'MAIN')
         : 'MAIN';
-
-      if (isReddit && !interaction.options.getString('account')) {
-        return interaction.editReply(
-          '⚠️ Reddit link detected. Please use the **account** option to select MAIN or Alt 1.'
-        );
-      }
 
       const { taskType, credits } =
         detectCelebiTaskDetails(link);
