@@ -29,7 +29,8 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('account')
-        .setDescription('Account for Reddit links (defaults to MAIN)')
+        .setDescription('Account (MAIN or Alt 1) — Celebi sheet only')
+        .setRequired(false)
         .addChoices(
           { name: 'MAIN', value: 'MAIN' },
           { name: 'Alt 1', value: 'Alt 1' }
@@ -122,10 +123,13 @@ module.exports = {
     else {
 
       const provider = 'CELEBI';
-      const isReddit = link.includes('reddit.com');
-      const account = isReddit
-        ? (interaction.options.getString('account') || 'MAIN')
-        : 'MAIN';
+      const account = interaction.options.getString('account');
+
+      if (!account) {
+        return interaction.editReply(
+          '⚠️ **Account is required** for Celebi sheet. Please choose **MAIN** or **Alt 1**.'
+        );
+      }
 
       const { taskType, credits } =
         detectCelebiTaskDetails(link);
