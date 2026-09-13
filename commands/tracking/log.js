@@ -1,9 +1,7 @@
 const {
   SlashCommandBuilder,
   ActionRowBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  ModalBuilder,
+  StringSelectMenuBuilder,
 } = require('discord.js');
 const {
   sheets,
@@ -123,40 +121,36 @@ module.exports = {
     }
 
     // =========================
-    // CELEBI — Modal for account
+    // CELEBI — Ask account via select menu
     // =========================
-    const modal = new ModalBuilder()
-      .setCustomId(`celebi_log_${Date.now()}_${interaction.user.id}`)
-      .setTitle('Celebi – Select Account');
+    await interaction.deferReply();
 
-    const accountInput = new TextInputBuilder()
-      .setCustomId('account')
-      .setLabel('Account (MAIN or Alt 1)')
-      .setStyle(TextInputStyle.Short)
-      .setPlaceholder('Type MAIN or Alt 1')
-      .setRequired(true);
+    const selectRow = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId(`celebi_account_${interaction.user.id}`)
+        .setPlaceholder('Choose account...')
+        .addOptions([
+          { label: 'MAIN', value: 'MAIN' },
+          { label: 'Alt 1', value: 'Alt 1' },
+        ])
+    );
 
-    modal.addComponents(new ActionRowBuilder().addComponents(accountInput));
-    await interaction.showModal(modal);
+    const selectMsg = await interaction.editReply({
+      content: '👤 **Which account is this for?**',
+      components: [selectRow],
+    });
 
     try {
-      const modalInteraction = await interaction.awaitModalSubmit({
+      const selection = await selectMsg.awaitMessageComponent({
         filter: i =>
-          i.customId.startsWith('celebi_log_') &&
+          i.customId === `celebi_account_${interaction.user.id}` &&
           i.user.id === interaction.user.id,
         time: 60_000,
       });
 
-      await modalInteraction.deferReply();
+      await selection.deferUpdate();
 
-      const account =
-        modalInteraction.fields.getTextInputValue('account').trim();
-
-      if (!['MAIN', 'Alt 1'].includes(account)) {
-        return modalInteraction.editReply(
-          '⚠️ **Invalid account.** Please type exactly **MAIN** or **Alt 1**.'
-        );
-      }
+      const account = selection.values[0];
 
       const provider = 'CELEBI';
       const { taskType, credits } = detectCelebiTaskDetails(link);
@@ -205,12 +199,18 @@ module.exports = {
         newValues: [newRow],
       });
 
-      return modalInteraction.editReply(replyText);
+      return selection.editReply({
+        content: null,
+        components: [],
+        embeds: [],
+      }).then(() =>
+        interaction.editReply(replyText)
+      );
     } catch {
       try {
-        await interaction.followUp({
+        await interaction.editReply({
           content: '⏰ Account selection timed out. Please try again.',
-          ephemeral: true,
+          components: [],
         });
       } catch {
         // interaction fully expired
