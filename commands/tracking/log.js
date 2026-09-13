@@ -199,13 +199,10 @@ module.exports = {
         newValues: [newRow],
       });
 
-      return selection.editReply({
-        content: null,
+      await interaction.editReply({
+        content: replyText,
         components: [],
-        embeds: [],
-      }).then(() =>
-        interaction.editReply(replyText)
-      );
+      });
     } catch {
       try {
         await interaction.editReply({
