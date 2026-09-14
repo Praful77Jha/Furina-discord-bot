@@ -198,7 +198,7 @@ module.exports = {
       const selectRow = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
           .setCustomId(`dakshina_weeks_${interaction.user.id}`)
-          .setPlaceholder('Kitne weeks ki payment?')
+          .setPlaceholder('Select weeks to pay')
           .addOptions(options)
       );
 
@@ -213,7 +213,7 @@ module.exports = {
           `--------------------\n\n` +
           weekBreakdown + '\n\n' +
           `--------------------\n` +
-          `👇 **Kitne weeks ki payment karni hai?**`,
+          `Select weeks to pay:`,
         components: [selectRow],
       });
 
@@ -262,7 +262,7 @@ module.exports = {
         });
       } catch {
         await interaction.editReply({
-          content: '⏰ Payment selection timed out. Please try again.',
+          content: '⏰ Selection timed out. Please try again.',
           components: [],
         });
       }
