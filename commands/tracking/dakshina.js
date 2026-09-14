@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  AttachmentBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+} = require('discord.js');
 const path = require('path');
 const fs = require('fs');
 const { sheets, SHEET_CONFIGS, getSheetTitle } = require('../../utils/googleSheets');
@@ -15,7 +20,6 @@ function resolveSheetKey(channelId) {
 }
 
 // Reads the live USD->INR rate from cell H1 on the Captain sheet
-// (=GOOGLEFINANCE("CURRENCY:USDINR")), used for every sheet's calc.
 async function getUsdToInrRate() {
   const sheetTitle = await getSheetTitle(SHEET_CONFIGS.captain.spreadsheetId);
   const response = await sheets.spreadsheets.values.get({
@@ -32,8 +36,69 @@ async function getUsdToInrRate() {
   return rate;
 }
 
-// Same unpaid-amount logic as stats.js, just without the date tracking.
-async function getUnpaidAmount(sheetKey) {
+// Dates are stored as "M/D/YYYY" strings. Returns a Date or null.
+function parseTaskDate(str) {
+  if (!str) return null;
+  const parts = str.toString().trim().split('/');
+  if (parts.length !== 3) return null;
+  const [month, day, year] = parts.map(n => parseInt(n, 10));
+  if (!month || !day || !year) return null;
+  const d = new Date(year, month - 1, day);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Gets the start date of the calendar week containing `date`.
+// startDay: 0 = Sunday, 1 = Monday
+function getWeekStartDate(date, startDay) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day - startDay + 7) % 7;
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Formats "Sep 6 – Sep 12" from a week start date.
+function formatWeekRange(weekStart) {
+  const opts = { month: 'short', day: 'numeric' };
+  const start = weekStart.toLocaleDateString('en-US', opts);
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  const endStr = end.toLocaleDateString('en-US', opts);
+  return `${start} – ${endStr}`;
+}
+
+// Groups entries by real calendar weeks.
+function groupByWeeks(entries, weekStartDay) {
+  if (entries.length === 0) return [];
+
+  const weekMap = {};
+  for (const entry of entries) {
+    if (!entry.date) continue;
+    const weekStart = getWeekStartDate(entry.date, weekStartDay);
+    const key = weekStart.toISOString();
+
+    if (!weekMap[key]) {
+      weekMap[key] = { weekStart, count: 0, amount: 0 };
+    }
+    weekMap[key].count++;
+    weekMap[key].amount += entry.amount;
+  }
+
+  const sorted = Object.values(weekMap).sort(
+    (a, b) => a.weekStart - b.weekStart
+  );
+
+  return sorted.map((w, i) => ({
+    week: i + 1,
+    label: formatWeekRange(w.weekStart),
+    count: w.count,
+    amount: w.amount,
+  }));
+}
+
+// Fetches unpaid entries with dates for week grouping.
+async function getUnpaidEntries(sheetKey) {
   const config = SHEET_CONFIGS[sheetKey];
   const sheetTitle = await getSheetTitle(config.spreadsheetId);
   const response = await sheets.spreadsheets.values.get({
@@ -41,14 +106,17 @@ async function getUnpaidAmount(sheetKey) {
     range: `'${sheetTitle}'!A${config.startRow}:${config.lastCol}`
   });
   const rows = response.data.values || [];
-  let unpaidAmount = 0;
+  const entries = [];
 
   if (sheetKey === 'captain') {
     const realRows = rows.filter(row => row[4] && row[4].toString().trim());
     realRows.forEach(row => {
       const amount = parseFloat(row[2] ? row[2].toString().replace('$', '') : 0) || 0;
       const status = row[3] ? row[3].toString().trim() : '';
-      if (status === 'Not Paid') unpaidAmount += amount;
+      if (status === 'Not Paid') {
+        const date = parseTaskDate(row[0]);
+        if (date) entries.push({ date, amount });
+      }
     });
   } else {
     const realRows = rows.filter(row => row[0] && row[0].toString().trim());
@@ -57,11 +125,14 @@ async function getUnpaidAmount(sheetKey) {
     realRows.forEach(row => {
       const credits = parseFloat(row[creditsIdx] || 0) || 0;
       const status = (row[payIdx] || '').toString().trim().toUpperCase();
-      if (status !== 'PAID') unpaidAmount += credits;
+      if (status !== 'PAID') {
+        const date = parseTaskDate(row[1]);
+        if (date) entries.push({ date, amount: credits });
+      }
     });
   }
 
-  return unpaidAmount;
+  return entries;
 }
 
 module.exports = {
@@ -95,23 +166,106 @@ module.exports = {
         return interaction.editReply(`⚠️ QR image for **${app.label}** not found at \`assets/qr/${app.file}\`.`);
       }
 
-      const [unpaidAmount, usdToInrRate] = await Promise.all([
-        getUnpaidAmount(sheetKey),
+      const [unpaidEntries, usdToInrRate] = await Promise.all([
+        getUnpaidEntries(sheetKey),
         getUsdToInrRate()
       ]);
-      const unpaidInr = unpaidAmount * usdToInrRate;
 
-      const attachment = new AttachmentBuilder(qrPath, { name: app.file });
+      const weekStartDay = sheetKey === 'captain' ? 1 : 0; // Monday / Sunday
+      const weeks = groupByWeeks(unpaidEntries, weekStartDay);
 
-    return interaction.editReply({
+      if (weeks.length === 0) {
+        return interaction.editReply('✅ No unpaid entries found!');
+      }
+
+      const maxWeeks = Math.min(weeks.length, 4);
+
+      // Build dropdown options: "1 Week", "2 Weeks", ... up to available weeks
+      const options = [];
+      for (let i = 1; i <= maxWeeks; i++) {
+        let totalAmount = 0;
+        for (let w = 0; w < i; w++) {
+          totalAmount += weeks[w].amount;
+        }
+        const totalInr = totalAmount * usdToInrRate;
+        options.push({
+          label: `${i} Week${i > 1 ? 's' : ''}`,
+          description: `$${totalAmount.toFixed(2)} / ₹${totalInr.toFixed(2)}`,
+          value: String(i),
+        });
+      }
+
+      const selectRow = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId(`dakshina_weeks_${interaction.user.id}`)
+          .setPlaceholder('Kitne weeks ki payment?')
+          .addOptions(options)
+      );
+
+      const weekBreakdown = weeks.slice(0, maxWeeks).map(w => {
+        const wInr = w.amount * usdToInrRate;
+        return `📅 **Week ${w.week}** (${w.label}): ${w.count} entries, $${w.amount.toFixed(2)}`;
+      }).join('\n');
+
+      await interaction.editReply({
         content:
           `🙏 **Payment — ${config.label} Sheet**\n` +
           `--------------------\n\n` +
-          `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n\n` +
-          `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n\n` +
-          `📄 **Sheet:** https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit`,
-        files: [attachment]
+          weekBreakdown + '\n\n' +
+          `--------------------\n` +
+          `👇 **Kitne weeks ki payment karni hai?**`,
+        components: [selectRow],
       });
+
+      try {
+        const selection = await interaction.channel.awaitMessageComponent({
+          filter: i =>
+            i.customId === `dakshina_weeks_${interaction.user.id}` &&
+            i.user.id === interaction.user.id,
+          time: 60_000,
+        });
+
+        await selection.deferUpdate();
+
+        const selectedWeeks = parseInt(selection.values[0], 10);
+
+        let totalAmount = 0;
+        let totalEntries = 0;
+        for (let w = 0; w < selectedWeeks; w++) {
+          totalAmount += weeks[w].amount;
+          totalEntries += weeks[w].count;
+        }
+        const totalInr = totalAmount * usdToInrRate;
+
+        const selectedBreakdown = weeks.slice(0, selectedWeeks).map(w => {
+          const wInr = w.amount * usdToInrRate;
+          return (
+            `📅 **Week ${w.week}** (${w.label})\n` +
+            `   🔢 Entries: ${w.count} | 💰 $${w.amount.toFixed(2)} | 🇮🇳 ₹${wInr.toFixed(2)}`
+          );
+        }).join('\n');
+
+        const attachment = new AttachmentBuilder(qrPath, { name: app.file });
+
+        await interaction.editReply({
+          content:
+            `🙏 **Payment — ${config.label} Sheet**\n` +
+            `====================\n\n` +
+            selectedBreakdown + '\n\n' +
+            `====================\n\n` +
+            `🔢 **Total Entries:** ${totalEntries}\n` +
+            `💰 **Total Amount:** $${totalAmount.toFixed(2)}\n` +
+            `🇮🇳 **Total in INR:** ₹${totalInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n\n` +
+            `📄 **Sheet:** https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit`,
+          components: [],
+          files: [attachment],
+        });
+      } catch {
+        await interaction.editReply({
+          content: '⏰ Payment selection timed out. Please try again.',
+          components: [],
+        });
+      }
     } catch (error) {
       console.error('Dakshina command error:', error);
       return interaction.editReply('⚠️ Could not load payment info right now. Please try again in a moment.');
