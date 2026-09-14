@@ -51,6 +51,9 @@ module.exports = {
     }
 
     const link = interaction.options.getString('link');
+
+    await interaction.deferReply();
+
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
 
     // Duplicate link check
@@ -65,10 +68,9 @@ module.exports = {
     );
 
     if (duplicateIndex !== -1) {
-      return interaction.reply({
-        content: `⚠️ **Duplicate Link detected!** Already logged on row **${duplicateIndex + config.startRow}**.`,
-        ephemeral: true,
-      });
+      return interaction.editReply(
+        `⚠️ **Duplicate Link detected!** Already logged on row **${duplicateIndex + config.startRow}**.`
+      );
     }
 
     const today = new Date();
@@ -79,8 +81,6 @@ module.exports = {
     // CAPTAIN
     // =========================
     if (sheetKey === 'captain') {
-      await interaction.deferReply();
-
       const customAmount = interaction.options.getNumber('amount');
       const { taskType, amount } = detectTaskDetails(link, customAmount);
 
@@ -121,9 +121,62 @@ module.exports = {
     }
 
     // =========================
-    // CELEBI — Ask account via select menu
+    // CELEBI
     // =========================
-    await interaction.deferReply();
+    const isReddit = link.toLowerCase().includes('reddit.com');
+
+    if (!isReddit) {
+      const provider = 'CELEBI';
+      const account = 'MAIN';
+      const { taskType, credits } = detectCelebiTaskDetails(link);
+
+      const newRow = [
+        provider,
+        formattedDate,
+        link,
+        account,
+        taskType,
+        credits,
+        'LIVE',
+        '',
+      ];
+
+      const replyText =
+        `✅ **Logged to Celebi!**\n` +
+        `🏷️ **Provider:** ${provider}\n` +
+        `📅 **Date:** ${formattedDate}\n` +
+        `📝 **Type:** ${taskType}\n` +
+        `💳 **Credits:** $${credits.toFixed(2)}\n` +
+        `🔗 **Link:** ${link}`;
+
+      const lastRow = await getLastDataRow(
+        config.spreadsheetId,
+        sheetTitle,
+        config.startRow,
+        config.colLetters.provider || config.colLetters.date
+      );
+      const nextRow = Math.max(lastRow + 1, config.startRow);
+      const range = `'${sheetTitle}'!A${nextRow}:${config.lastCol}${nextRow}`;
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: config.spreadsheetId,
+        range,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [newRow] },
+      });
+
+      await logHistory(config.spreadsheetId, {
+        user: interaction.user.tag,
+        command: 'log',
+        range,
+        oldValues: [],
+        newValues: [newRow],
+      });
+
+      return interaction.editReply(replyText);
+    }
+
+    // Reddit → ask account via select menu
 
     const selectRow = new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder()

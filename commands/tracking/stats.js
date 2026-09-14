@@ -41,6 +41,57 @@ function distinctDayCount(dates) {
   return uniqueDays.size;
 }
 
+// Gets the start date of the calendar week containing `date`.
+// startDay: 0 = Sunday, 1 = Monday
+function getWeekStartDate(date, startDay) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day - startDay + 7) % 7;
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Groups entries by real calendar weeks.
+// weekStartDay: 0 = Sunday (Celebi), 1 = Monday (Captain)
+function groupByWeeks(entries, weekStartDay) {
+  if (entries.length === 0) return [];
+
+  const weekMap = {};
+  for (const entry of entries) {
+    if (!entry.date) continue;
+    const weekStart = getWeekStartDate(entry.date, weekStartDay);
+    const key = weekStart.toISOString();
+
+    if (!weekMap[key]) {
+      weekMap[key] = { weekStart, count: 0, amount: 0 };
+    }
+    weekMap[key].count++;
+    weekMap[key].amount += entry.amount;
+  }
+
+  const sorted = Object.values(weekMap).sort(
+    (a, b) => a.weekStart - b.weekStart
+  );
+
+  return sorted.map((w, i) => ({
+    week: i + 1,
+    label: formatWeekRange(w.weekStart),
+    count: w.count,
+    amount: w.amount,
+  }));
+}
+
+// Formats "Mon Sep 8 – Sun Sep 14" from a week start date.
+function formatWeekRange(weekStart) {
+  const opts = { month: 'short', day: 'numeric' };
+  const start = weekStart.toLocaleDateString('en-US', opts);
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  const endStr = end.toLocaleDateString('en-US', opts);
+  return `${start} – ${endStr}`;
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
@@ -89,7 +140,7 @@ module.exports = {
 
         let unpaidAmount = 0;
         let unpaidCount = 0;
-        const unpaidDates = [];
+        const unpaidEntries = [];
 
         realRows.forEach(row => {
           const amount =
@@ -107,13 +158,22 @@ module.exports = {
             unpaidAmount += amount;
             unpaidCount++;
             const date = parseTaskDate(row[0]); // Column A = Date
-            if (date) unpaidDates.push(date);
+            if (date) unpaidEntries.push({ date, amount });
           }
         });
 
         const unpaidInr = unpaidAmount * usdToInrRate;
-        const span = distinctDayCount(unpaidDates);
-        const spanText = span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
+        const weeks = groupByWeeks(unpaidEntries, 1); // 1 = Monday start
+
+        const weekBlocks = weeks.map(w => {
+          const wInr = w.amount * usdToInrRate;
+          return (
+            `📅 **Week ${w.week}** (${w.label})\n` +
+            `🔢 **Unpaid Entries:** ${w.count}\n` +
+            `💰 **Unpaid Amount:** $${w.amount.toFixed(2)}\n` +
+            `🇮🇳 **Unpaid in INR:** ₹${wInr.toFixed(2)}`
+          );
+        }).join('\n\n');
 
         return interaction.editReply(
           `📊 **Captain Sheet Overview**\n` +
@@ -121,7 +181,8 @@ module.exports = {
           `🔢 **Total Unpaid Entries:** ${unpaidCount}\n` +
           `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n` +
           `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
-          `📅 **Total Days:** ${spanText}`
+          `--------------------\n` +
+          (weekBlocks || '📅 No unpaid entries')
         );
       }
 
@@ -146,7 +207,7 @@ module.exports = {
 
       let unpaidCredits = 0;
       let unpaidCount = 0;
-      const unpaidDates = [];
+      const unpaidEntries = [];
 
       realRows.forEach(row => {
         const credits =
@@ -162,13 +223,22 @@ module.exports = {
           unpaidCredits += credits;
           unpaidCount++;
           const date = parseTaskDate(row[1]); // Column B = Date
-          if (date) unpaidDates.push(date);
+          if (date) unpaidEntries.push({ date, amount: credits });
         }
       });
 
       const unpaidInr = unpaidCredits * usdToInrRate;
-      const span = distinctDayCount(unpaidDates);
-      const spanText = span === null ? 'N/A' : `${span} day${span === 1 ? '' : 's'}`;
+      const weeks = groupByWeeks(unpaidEntries, 0); // 0 = Sunday start
+
+      const weekBlocks = weeks.map(w => {
+        const wInr = w.amount * usdToInrRate;
+        return (
+          `📅 **Week ${w.week}** (${w.label})\n` +
+          `🔢 **Unpaid Entries:** ${w.count}\n` +
+          `💰 **Unpaid Credits:** $${w.amount.toFixed(2)}\n` +
+          `🇮🇳 **Unpaid in INR:** ₹${wInr.toFixed(2)}`
+        );
+      }).join('\n\n');
 
       return interaction.editReply(
         `📊 **Celebi Sheet Overview**\n` +
@@ -176,7 +246,8 @@ module.exports = {
         `🔢 **Total Unpaid Entries:** ${unpaidCount}\n` +
         `💰 **Unpaid Credits:** $${unpaidCredits.toFixed(2)}\n` +
         `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
-        `📅 **Total Days:** ${spanText}`
+        `--------------------\n` +
+        (weekBlocks || '📅 No unpaid entries')
       );
 
     } catch (error) {
