@@ -29,6 +29,13 @@ function parseTaskDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
+// Number of distinct calendar days that have at least one unpaid task.
+function distinctDayCount(dates) {
+  if (dates.length === 0) return null;
+  const uniqueDays = new Set(dates.map(d => d.toDateString()));
+  return uniqueDays.size;
+}
+
 // Gets the start date of the calendar week containing `date`.
 // startDay: 0 = Sunday, 1 = Monday
 function getWeekStartDate(date, startDay) {
@@ -145,6 +152,10 @@ module.exports = {
       const totalUnpaid = captain.unpaidAmount + celebi.unpaidAmount;
       const totalUnpaidInr = totalUnpaid * usdToInrRate;
 
+      const captainDays = distinctDayCount(captain.unpaidEntries.map(e => e.date));
+      const celebiDays = distinctDayCount(celebi.unpaidEntries.map(e => e.date));
+      const fmtDays = (d) => d === null ? 'N/A' : `${d} day${d === 1 ? '' : 's'}`;
+
       const captainWeeks = groupByWeeks(captain.unpaidEntries, 1); // Monday start
       const celebiWeeks = groupByWeeks(celebi.unpaidEntries, 0);   // Sunday start
 
@@ -177,10 +188,12 @@ module.exports = {
         `====================\n\n` +
         `🟦 **Captain Sheet** (Monday start)\n` +
         `--------------------\n` +
+        `📅 **Total Days:** ${fmtDays(captainDays)}\n` +
         (captainWeekBlocks || '📅 No unpaid entries') +
         `\n\n` +
         `🟪 **Celebi Sheet** (Sunday start)\n` +
         `--------------------\n` +
+        `📅 **Total Days:** ${fmtDays(celebiDays)}\n` +
         (celebiWeekBlocks || '📅 No unpaid entries')
       );
     } catch (error) {

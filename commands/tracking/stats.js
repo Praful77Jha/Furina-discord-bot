@@ -169,6 +169,7 @@ module.exports = {
 
         const unpaidInr = unpaidAmount * usdToInrRate;
         const weeks = groupByWeeks(unpaidEntries, 1); // 1 = Monday start
+        const totalDays = distinctDayCount(unpaidEntries.map(e => e.date));
 
         const weekBlocks = weeks.map(w => {
           const wInr = w.amount * usdToInrRate;
@@ -186,6 +187,7 @@ module.exports = {
           `🔢 **Total Unpaid Entries:** ${unpaidCount}\n` +
           `💰 **Unpaid Amount:** $${unpaidAmount.toFixed(2)}\n` +
           `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
+          `📅 **Total Days:** ${totalDays === null ? 'N/A' : `${totalDays} day${totalDays === 1 ? '' : 's'}`}\n` +
           `--------------------\n` +
           (weekBlocks || '📅 No unpaid entries')
         );
@@ -234,6 +236,7 @@ module.exports = {
 
       const unpaidInr = unpaidCredits * usdToInrRate;
       const weeks = groupByWeeks(unpaidEntries, 0); // 0 = Sunday start
+      const totalDays = distinctDayCount(unpaidEntries.map(e => e.date));
 
       const weekBlocks = weeks.map(w => {
         const wInr = w.amount * usdToInrRate;
@@ -251,6 +254,7 @@ module.exports = {
         `🔢 **Total Unpaid Entries:** ${unpaidCount}\n` +
         `💰 **Unpaid Credits:** $${unpaidCredits.toFixed(2)}\n` +
         `🇮🇳 **Unpaid in INR:** ₹${unpaidInr.toFixed(2)} (1$ = ₹${usdToInrRate.toFixed(2)})\n` +
+        `📅 **Total Days:** ${totalDays === null ? 'N/A' : `${totalDays} day${totalDays === 1 ? '' : 's'}`}\n` +
         `--------------------\n` +
         (weekBlocks || '📅 No unpaid entries')
       );
