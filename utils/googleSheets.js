@@ -76,7 +76,7 @@ const SHEET_CONFIGS = {
   },
   celebiCopy: {
     label: 'Celebi Copy',
-    spreadsheetId: '1kVpKRdsQ1SjHaXdyKAm6UN6K45mlGW0GjoK6JifjdwA',
+    spreadsheetId: process.env.CELEBI_COPY_SPREADSHEET_ID,
     channelId: process.env.CELEBI_CHANNEL_ID,
     startRow: 11,
     lastCol: 'H',
