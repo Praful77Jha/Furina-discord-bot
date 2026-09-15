@@ -73,6 +73,23 @@ const SHEET_CONFIGS = {
       status: 'G',
       pay: 'H'
     }
+  },
+  celebiCopy: {
+    label: 'Celebi Copy',
+    spreadsheetId: '1kVpKRdsQ1SjHaXdyKAm6UN6K45mlGW0GjoK6JifjdwA',
+    channelId: process.env.CELEBI_CHANNEL_ID,
+    startRow: 11,
+    lastCol: 'H',
+    colLetters: {
+      provider: 'A',
+      date: 'B',
+      link: 'C',
+      account: 'D',
+      type: 'E',
+      credits: 'F',
+      status: 'G',
+      pay: 'H'
+    }
   }
 };
 

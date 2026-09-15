@@ -137,7 +137,7 @@ module.exports = {
     try {
       const [captain, celebi] = await Promise.all([
         getSheetUnpaidStats('captain'),
-        getSheetUnpaidStats('celebi')
+        getSheetUnpaidStats('celebiCopy')
       ]);
       const usdToInrRate = await getUsdToInrRate();
 

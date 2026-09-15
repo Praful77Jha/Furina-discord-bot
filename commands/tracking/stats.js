@@ -101,12 +101,17 @@ module.exports = {
     await interaction.deferReply();
 
     try {
-      const sheetKey = resolveSheetKey(interaction.channelId);
+      let sheetKey = resolveSheetKey(interaction.channelId);
 
       if (!sheetKey) {
         return interaction.editReply(
           '⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.'
         );
+      }
+
+      // Use celebiCopy instead of celebi for stats
+      if (sheetKey === 'celebi') {
+        sheetKey = 'celebiCopy';
       }
 
       const config = SHEET_CONFIGS[sheetKey];

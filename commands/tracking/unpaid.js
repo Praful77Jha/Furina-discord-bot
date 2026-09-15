@@ -76,7 +76,11 @@ module.exports = {
     await interaction.deferReply();
     const subcommand = interaction.options.getSubcommand();
 
-    const sheetKey = resolveSheetKey(interaction.channelId);
+    let sheetKey = resolveSheetKey(interaction.channelId);
+    // Use celebiCopy instead of celebi
+    if (sheetKey === 'celebi') {
+      sheetKey = 'celebiCopy';
+    }
     if (!sheetKey) {
       return interaction.editReply('⚠️ This channel isn\'t linked to a sheet. Use this command in **#captain-sheet** or **#celebi-sheet**.');
     }

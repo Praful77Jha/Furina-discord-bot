@@ -56,7 +56,7 @@ module.exports = {
 
     const sheetTitle = await getSheetTitle(config.spreadsheetId);
 
-    // Duplicate link check
+    // Duplicate link check on original sheet
     const linkCol = config.colLetters.link;
     const existingData = await sheets.spreadsheets.values.get({
       spreadsheetId: config.spreadsheetId,
@@ -71,6 +71,26 @@ module.exports = {
       return interaction.editReply(
         `⚠️ **Duplicate Link detected!** Already logged on row **${duplicateIndex + config.startRow}**.`
       );
+    }
+
+    // Also check celebi copy sheet for duplicates
+    if (sheetKey === 'celebi') {
+      const celebiCopyConfig = SHEET_CONFIGS.celebiCopy;
+      const copySheetTitle = await getSheetTitle(celebiCopyConfig.spreadsheetId);
+      const copyExistingData = await sheets.spreadsheets.values.get({
+        spreadsheetId: celebiCopyConfig.spreadsheetId,
+        range: `'${copySheetTitle}'!${linkCol}${celebiCopyConfig.startRow}:${linkCol}`,
+      });
+      const copyExistingLinks = copyExistingData.data.values || [];
+      const copyDuplicateIndex = copyExistingLinks.findIndex(
+        row => row[0] && row[0].trim() === link.trim()
+      );
+
+      if (copyDuplicateIndex !== -1) {
+        return interaction.editReply(
+          `⚠️ **Duplicate Link detected!** Already logged on row **${copyDuplicateIndex + celebiCopyConfig.startRow}** in Celebi Copy sheet.`
+        );
+      }
     }
 
     const today = new Date();
@@ -124,6 +144,35 @@ module.exports = {
     // CELEBI
     // =========================
     const isReddit = link.toLowerCase().includes('reddit.com');
+    const celebiCopyConfig = SHEET_CONFIGS.celebiCopy;
+
+    // Helper: write row to a sheet
+    async function writeToSheet(sheetConfig, row) {
+      const st = await getSheetTitle(sheetConfig.spreadsheetId);
+      const lastRow = await getLastDataRow(
+        sheetConfig.spreadsheetId,
+        st,
+        sheetConfig.startRow,
+        sheetConfig.colLetters.provider || sheetConfig.colLetters.date
+      );
+      const nextRow = Math.max(lastRow + 1, sheetConfig.startRow);
+      const rng = `'${st}'!A${nextRow}:${sheetConfig.lastCol}${nextRow}`;
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetConfig.spreadsheetId,
+        range: rng,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [row] },
+      });
+
+      await logHistory(sheetConfig.spreadsheetId, {
+        user: interaction.user.tag,
+        command: 'log',
+        range: rng,
+        oldValues: [],
+        newValues: [row],
+      });
+    }
 
     if (!isReddit) {
       const provider = 'CELEBI';
@@ -141,6 +190,12 @@ module.exports = {
         '',
       ];
 
+      // Log to original celebi sheet
+      await writeToSheet(config, newRow);
+
+      // Log to celebi copy sheet
+      await writeToSheet(celebiCopyConfig, newRow);
+
       const replyText =
         `✅ **Logged to Celebi!**\n` +
         `🏷️ **Provider:** ${provider}\n` +
@@ -149,34 +204,10 @@ module.exports = {
         `💳 **Credits:** $${credits.toFixed(2)}\n` +
         `🔗 **Link:** ${link}`;
 
-      const lastRow = await getLastDataRow(
-        config.spreadsheetId,
-        sheetTitle,
-        config.startRow,
-        config.colLetters.provider || config.colLetters.date
-      );
-      const nextRow = Math.max(lastRow + 1, config.startRow);
-      const range = `'${sheetTitle}'!A${nextRow}:${config.lastCol}${nextRow}`;
-
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: config.spreadsheetId,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [newRow] },
-      });
-
-      await logHistory(config.spreadsheetId, {
-        user: interaction.user.tag,
-        command: 'log',
-        range,
-        oldValues: [],
-        newValues: [newRow],
-      });
-
       return interaction.editReply(replyText);
     }
 
-    // Reddit → ask account via select menu
+    // Reddit → ask account via select menu, log to celebi copy only
 
     const selectRow = new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder()
@@ -228,29 +259,8 @@ module.exports = {
         `💳 **Credits:** $${credits.toFixed(2)}\n` +
         `🔗 **Link:** ${link}`;
 
-      const lastRow = await getLastDataRow(
-        config.spreadsheetId,
-        sheetTitle,
-        config.startRow,
-        config.colLetters.provider || config.colLetters.date
-      );
-      const nextRow = Math.max(lastRow + 1, config.startRow);
-      const range = `'${sheetTitle}'!A${nextRow}:${config.lastCol}${nextRow}`;
-
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: config.spreadsheetId,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [newRow] },
-      });
-
-      await logHistory(config.spreadsheetId, {
-        user: interaction.user.tag,
-        command: 'log',
-        range,
-        oldValues: [],
-        newValues: [newRow],
-      });
+      // Reddit tasks log to celebi copy sheet only
+      await writeToSheet(celebiCopyConfig, newRow);
 
       await interaction.editReply({
         content: replyText,
