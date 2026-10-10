@@ -129,7 +129,7 @@ function detectTaskDetails(url, customAmount) {
   if (link.includes('twitter.com') || link.includes('x.com')) {
     taskType = 'Comment (Twitter/X)';
     defaultAmount = 0.15;
-  } else if (link.includes('linkedin.com')) {
+  } else if (link.includes('linkedin.com') || link.includes('lnkd.in')) {
     taskType = 'Comment(Linkedin)';
     defaultAmount = 0.15;
   } else if (link.includes('medium.com')) {
